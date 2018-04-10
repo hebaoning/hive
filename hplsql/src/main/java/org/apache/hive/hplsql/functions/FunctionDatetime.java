@@ -18,14 +18,18 @@
 
 package org.apache.hive.hplsql.functions;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.hive.hplsql.Conn;
+import org.apache.hive.hplsql.Exec;
+import org.apache.hive.hplsql.HplsqlParser;
+import org.apache.hive.hplsql.Utils;
+import org.apache.hive.hplsql.Var;
+
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.hive.hplsql.*;
 
 public class FunctionDatetime extends Function {
   public FunctionDatetime(Exec e) {
@@ -44,6 +48,7 @@ public class FunctionDatetime extends Function {
     f.map.put("TO_TIMESTAMP", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { toTimestamp(ctx); }});
     f.map.put("TIMESTAMP_FORMAT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { toTimestamp(ctx); }});
     f.map.put("TO_DATE", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { toTimestamp(ctx); }});
+    f.map.put("TS_FMT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { toTimestamp(ctx); }});
     f.map.put("UNIX_TIMESTAMP", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { unixTimestamp(ctx); }});
   
     f.specMap.put("CURRENT_DATE", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { currentDate(ctx); }});

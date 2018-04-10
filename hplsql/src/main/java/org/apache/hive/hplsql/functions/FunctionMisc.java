@@ -18,13 +18,17 @@
 
 package org.apache.hive.hplsql.functions;
 
+import org.apache.hive.hplsql.Conn;
+import org.apache.hive.hplsql.Exec;
+import org.apache.hive.hplsql.HplsqlParser;
+import org.apache.hive.hplsql.Query;
+import org.apache.hive.hplsql.Var;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.hive.hplsql.*;
 
 public class FunctionMisc extends Function {
   public FunctionMisc(Exec e) {
@@ -42,6 +46,7 @@ public class FunctionMisc extends Function {
     f.map.put("NVL2", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { nvl2(ctx); }});
     f.map.put("PART_COUNT_BY", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { partCountBy(ctx); }});
     f.map.put("INTEGER", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
+    f.map.put("INT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
 
     f.specMap.put("ACTIVITY_COUNT", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { activityCount(ctx); }});
     f.specMap.put("CAST", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { cast(ctx); }});
