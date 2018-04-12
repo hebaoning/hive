@@ -504,6 +504,16 @@ public class Var {
 	  }
 	  throw new NumberFormatException();
 	}
+
+	public long bigIntValue() {
+        if (type == Type.BIGINT) {
+            return ((Long)value).longValue();
+        }
+        else if (type == Type.STRING) {
+            return Long.parseLong((String)value);
+        }
+        throw new NumberFormatException();
+    }
 	
 	/**
    * Return a long integer value
