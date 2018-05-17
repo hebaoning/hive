@@ -325,10 +325,8 @@ public class Select {
 
     HplsqlParser.Subselect_stmtContext subselectStmtContext = (HplsqlParser.Subselect_stmtContext)ctx.parent;
     HplsqlParser.From_clauseContext fromClauseContext = subselectStmtContext.from_clause();
-    if (fromClauseContext == null
-        || fromClauseContext.from_table_clause() == null
-        || fromClauseContext.from_table_clause().from_table_name_clause() == null) {
-      trace(ctx, "need from-table-name-clause");
+    if (fromClauseContext == null) {
+      trace(ctx, "need from-clause");
       return false;
     }
 /*
