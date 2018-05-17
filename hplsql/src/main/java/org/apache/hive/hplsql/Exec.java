@@ -2437,6 +2437,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   @Override
   public Integer visitMerge_table(HplsqlParser.Merge_tableContext ctx) {
     StringBuilder sql = new StringBuilder();
+
     if (ctx.table_name() != null) {
       sql.append(evalPop(ctx.table_name()));
     } else {
@@ -2447,6 +2448,26 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
         sql.append(" AS");
       }
       sql.append(" ").append(evalPop(ctx.ident()).toString());
+    }
+
+    stackPush(sql.toString());
+    return 0;
+  }
+
+  @Override
+  public Integer visitSelect_list_item(HplsqlParser.Select_list_itemContext ctx) {
+    StringBuilder sql = new StringBuilder();
+
+    if (ctx.select_list_asterisk() != null) {
+      sql.append(exec.getText(ctx.select_list_asterisk()));
+    } else {
+      if (ctx.ident() != null) {
+        sql.append(evalPop(ctx.ident())).append(" = ");
+      }
+      sql.append(evalPop(ctx.expr()));
+      if (ctx.select_list_alias() != null) {
+        sql.append(" ").append(exec.getText(ctx.select_list_alias()));
+      }
     }
 
     stackPush(sql.toString());

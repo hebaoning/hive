@@ -284,10 +284,13 @@ public class Select {
   }
 
   public Integer simpleInsertSelectList(HplsqlParser.Select_listContext ctx) {
+    boolean oldBuildSql = exec.buildSql;
+    exec.buildSql = true;
+
     List<String> rowValues = ctx.select_list_item().stream()
         .map(it -> StringUtils.strip(evalPop(it).toString(), "`\""))
         .collect(Collectors.toList());
-     trace(ctx, "select list: " + StringUtils.join(rowValues, ","));
+     trace(ctx, "org row values: " + StringUtils.join(rowValues, ","));
 
     HplsqlParser.Insert_stmtContext insertStmtContext =
         (HplsqlParser.Insert_stmtContext)ctx.parent.parent.parent.parent.parent;
@@ -306,6 +309,8 @@ public class Select {
       rowValues = buildRowValues(columnNames, identNames, rowValues);
       trace(ctx, tableName + " rows: " + StringUtils.join(rowValues, ","));
     }
+
+    exec.buildSql = oldBuildSql;
     exec.stackPush(StringUtils.join(rowValues, ","));
     return 0;
   }
