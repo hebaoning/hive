@@ -45,9 +45,10 @@ public class FunctionString extends Function {
     f.map.put("UPPER", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { upper(ctx); }});
     f.map.put("RIGHT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { right(ctx); }});
     f.map.put("LEFT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { left(ctx); }});
+    f.map.put("TRIM", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { trim(ctx); }});
+    f.map.put("SUBSTRING", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { substring(ctx); }});
 
     f.specMap.put("SUBSTRING", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { substring(ctx); }});
-    f.specMap.put("TRIM", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { trim(ctx); }});
   }
   
   /**
@@ -244,7 +245,7 @@ public class FunctionString extends Function {
    * SUBSTRING FROM FOR function
    */
   void substring(HplsqlParser.Expr_spec_funcContext ctx) {
-    String str = evalPop(ctx.expr(0)).toString(); 
+    String str = evalPop(ctx.expr(0)).toString();
     int start = evalPop(ctx.expr(1)).intValue();
     int len = -1;
     if (start == 0) {
@@ -255,17 +256,30 @@ public class FunctionString extends Function {
     }
     substr(str, start, len);
   }
+
+  /**
+   * SUBSTRRING function
+   */
+  void substring(HplsqlParser.Expr_func_paramsContext ctx) {
+    String str = evalPop(ctx.func_param(0)).toString();
+    int start = evalPop(ctx.func_param(1)).intValue();
+    if (start == 0) {
+      start = 1;
+    }
+    int len = evalPop(ctx.func_param(2)).intValue();
+    substr(str, start, len);
+  }
   
   /**
    * TRIM function
    */
-  void trim(HplsqlParser.Expr_spec_funcContext ctx) {
-    int cnt = ctx.expr().size();
+  void trim(HplsqlParser.Expr_func_paramsContext ctx) {
+    int cnt = ctx.func_param().size();
     if (cnt != 1) {
       evalNull();
       return;
     }
-    String str = evalPop(ctx.expr(0)).toString(); 
+    String str = evalPop(ctx.func_param(0)).toString();
     evalString(str.trim());
   }
   
