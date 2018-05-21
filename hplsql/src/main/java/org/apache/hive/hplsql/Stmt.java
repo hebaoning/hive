@@ -1190,7 +1190,7 @@ public class Stmt {
       alias = evalPop(ctx.update_alias().ident()).toString();
       updateAssignment = updateAssignment.replace(alias + ".", "");
     }
-    sqlBuilder.append(exec.getFormattedText(ctx.update_table()))
+    sqlBuilder.append(evalPop(ctx.update_table()))
         .append(" SET ").append(updateAssignment).append(" ");
 
     if (ctx.where_clause() != null) {
