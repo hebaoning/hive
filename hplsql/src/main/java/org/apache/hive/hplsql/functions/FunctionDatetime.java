@@ -23,11 +23,15 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hive.hplsql.*;
 
 public class FunctionDatetime extends Function {
+
+  private static final int DAYS_FROM_Y1_TO_Y1900 = 693595;
+
   public FunctionDatetime(Exec e) {
     super(e);
   }
@@ -50,6 +54,7 @@ public class FunctionDatetime extends Function {
     f.map.put("YEAR", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { year(ctx); }});
     f.map.put("MONTH", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { month(ctx); }});
     f.map.put("DAY", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { day(ctx); }});
+    f.map.put("_DAYS", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { days(ctx); }});
 
     f.specMap.put("CURRENT_DATE", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { currentDate(ctx); }});
     f.specMap.put("CURRENT_TIMESTAMP", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { currentTimestamp(ctx); }});
@@ -262,6 +267,20 @@ public class FunctionDatetime extends Function {
     Integer v = getPartOfDate(ctx, Calendar.DAY_OF_MONTH);
     if (v != null) {
       evalInt(v);
+    }
+    else {
+      evalNull();
+    }
+  }
+
+  /**
+   * @return Days between @day and 0001-1-1
+   */
+  private void days(HplsqlParser.Expr_func_paramsContext ctx) {
+    Var v = evalPop(ctx.func_param(0).expr());
+    if (v != null) {
+      Long days = (v.dateValue().getTime() - java.sql.Date.valueOf("1900-01-01").getTime()) / TimeUnit.DAYS.toMillis(1);
+      evalInt(days.intValue() + DAYS_FROM_Y1_TO_Y1900);
     }
     else {
       evalNull();
