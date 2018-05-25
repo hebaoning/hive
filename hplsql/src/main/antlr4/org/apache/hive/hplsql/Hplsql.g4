@@ -1091,11 +1091,11 @@ expr_case :                    // CASE expression
      ;
 
 expr_case_simple :
-       T_CASE expr (T_WHEN expr T_THEN stmt)+ (T_ELSE stmt)? T_END
+       T_CASE expr (T_WHEN expr T_THEN stmt T_SEMICOLON?)+ (T_ELSE stmt T_SEMICOLON?)? T_END
      ;
 
 expr_case_searched :              
-       T_CASE (T_WHEN bool_expr T_THEN stmt)+ (T_ELSE stmt)? T_END
+       T_CASE (T_WHEN bool_expr T_THEN stmt T_SEMICOLON?)+ (T_ELSE stmt T_SEMICOLON?)? T_END
      ;
      
 expr_cursor_attribute :
