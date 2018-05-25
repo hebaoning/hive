@@ -1136,6 +1136,31 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   }
 
   /**
+   * SQL CTE INSERT statement
+   */
+  @Override
+  public Integer visitCte_insert_stmt(HplsqlParser.Cte_insert_stmtContext ctx) {
+    StringBuilder sql = new StringBuilder();
+    boolean oldBuildSql = exec.buildSql;
+    exec.buildSql = true;
+    sql.append(evalPop(ctx.cte_select_stmt()).toString())
+        .append(" ")
+        .append(evalPop(ctx.insert_stmt()).toString());
+    exec.buildSql = oldBuildSql;
+
+    String sqlString = sql.toString();
+    trace(ctx, sqlString);
+    Query query = exec.executeSql(ctx, sqlString, exec.conf.defaultConnection);
+    if (query.error()) {
+      exec.signal(query);
+      return 1;
+    }
+    exec.setSqlSuccess();
+    exec.closeQuery(query, exec.conf.defaultConnection);
+    return 0;
+  }
+
+  /**
    * SQL INSERT statement
    */
   @Override 

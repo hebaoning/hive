@@ -74,6 +74,7 @@ stmt :
      | for_range_stmt
      | if_stmt     
      | include_stmt
+     | cte_insert_stmt
      | insert_stmt
      | insert_directory_stmt
      | get_diag_stmt
@@ -539,7 +540,11 @@ else_block :
 include_stmt :          // INCLUDE statement
        T_INCLUDE (file_name | expr)
      ;  
-     
+
+cte_insert_stmt :
+       cte_select_stmt insert_stmt
+     ;
+
 insert_stmt :           // INSERT statement
        T_INSERT (T_OVERWRITE T_TABLE | T_INTO T_TABLE?) table_name insert_stmt_cols? (select_stmt | insert_stmt_rows)
      ;

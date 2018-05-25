@@ -746,10 +746,17 @@ public class Stmt {
     if (partitionKeys != null && partitionKeys.size() > 0) {
       sql.append("PARTITION(").append(StringUtils.join(partitionKeys, ",")).append(") ");
     }
-
     sql.append(evalPop(ctx.select_stmt()).toString());
-    trace(ctx, sql.toString());
-    Query query = exec.executeSql(ctx, sql.toString(), exec.conf.defaultConnection);
+
+    String sqlString = sql.toString();
+    trace(ctx, sqlString);
+
+    if (exec.buildSql) {
+      exec.stackPush(sqlString);
+      return 0;
+    }
+
+    Query query = exec.executeSql(ctx, sqlString, exec.conf.defaultConnection);
     if (query.error()) {
       exec.signal(query);
       return 1;
@@ -829,10 +836,18 @@ public class Stmt {
           sql.append("\nUNION ALL\n");
         }
       }      
-    }    
-    if (trace) {
-      trace(ctx, sql.toString());
     }
+
+    String sqlString = sql.toString();
+    if (trace) {
+      trace(ctx, sqlString);
+    }
+
+    if (exec.buildSql) {
+      exec.stackPush(sqlString);
+      return 0;
+    }
+
     Query query = exec.executeSql(ctx, sql.toString(), conn);
     if (query.error()) {
       exec.signal(query);
