@@ -220,7 +220,7 @@ public class Select {
       last = ctx.where_clause().stop;
     }
     if (ctx.group_by_clause() != null) {
-      exec.append(sql, getText(ctx.group_by_clause()), last, ctx.group_by_clause().getStart());
+      exec.append(sql, evalPop(ctx.group_by_clause()).toString(), last, ctx.group_by_clause().getStart());
       last = ctx.group_by_clause().stop;
     }
     if (ctx.having_clause() != null) {
@@ -461,6 +461,22 @@ public class Select {
     StringBuilder sql = new StringBuilder();
     sql.append(ctx.T_WHERE().getText());
     sql.append(" " + evalPop(ctx.bool_expr()));
+    exec.stackPush(sql);
+    exec.buildSql = oldBuildSql;
+    return 0;
+  }
+
+  /**
+   * GROUP BY clause
+   */
+  public Integer groupBy(HplsqlParser.Group_by_clauseContext ctx) {
+    boolean oldBuildSql = exec.buildSql;
+    exec.buildSql = true;
+    StringBuilder sql = new StringBuilder("GROUP BY ");
+    sql.append(evalPop(ctx.expr(0)).toString());
+    for (int i = 1; i < ctx.expr().size(); i++) {
+      sql.append(", ").append(evalPop(ctx.expr(i)).toString());
+    }
     exec.stackPush(sql);
     exec.buildSql = oldBuildSql;
     return 0;

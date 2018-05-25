@@ -1089,8 +1089,13 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   @Override 
   public Integer visitWhere_clause(HplsqlParser.Where_clauseContext ctx) { 
     return exec.select.where(ctx); 
-  }  
-  
+  }
+
+  @Override
+  public Integer visitGroup_by_clause(HplsqlParser.Group_by_clauseContext ctx) {
+    return exec.select.groupBy(ctx);
+  }
+
   @Override 
   public Integer visitSelect_options_item(HplsqlParser.Select_options_itemContext ctx) { 
     return exec.select.option(ctx); 
