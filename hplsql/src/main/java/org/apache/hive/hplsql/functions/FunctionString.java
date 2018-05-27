@@ -41,7 +41,7 @@ public class FunctionString extends Function {
     f.map.put("REPLACE", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { replace(ctx); }}); 
     f.map.put("SUBSTR", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { substr(ctx); }});    
     f.map.put("SUBSTRING", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { substr(ctx); }});
-    f.map.put("TO_CHAR", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { toChar(ctx); }});
+    f.map.put("_TO_CHAR", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { toChar(ctx); }});
     f.map.put("UPPER", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { upper(ctx); }});
     f.map.put("RIGHT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { right(ctx); }});
     f.map.put("LEFT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { left(ctx); }});
