@@ -59,6 +59,9 @@ public class Converter {
     else if (t.equalsIgnoreCase("DATETIME") || t.equalsIgnoreCase("SMALLDATETIME")) {
       t = "TIMESTAMP";
     }
+    else if (t.equalsIgnoreCase("CHARACTER") && len != null) {
+      t = "CHAR" + exec.getText(len);
+    }
     else if ((t.equalsIgnoreCase("VARCHAR") || t.equalsIgnoreCase("NVARCHAR")) && len.T_MAX() != null) {
       t = "STRING";
     }
