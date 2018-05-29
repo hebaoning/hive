@@ -321,7 +321,16 @@ public class Stmt {
       if (trace) {
         trace(null, "Managed table name: " + managedName);
       }
-    }  
+    }
+
+    // FIXME: Workaround to create ACID temporary table
+    String[] tableNamePart = identCtx.getText().split("__");
+    if (tableNamePart.length >= 4 && tableNamePart[1].equalsIgnoreCase("acid")) {
+      sql.append("\nSTORED AS ORC")
+          .append("\nCLUSTERED BY (").append(tableNamePart[2]).append(") INTO 1 BUCKETS")
+          .append("\nTBLPROPERTIES ('transactional'='true')");
+    }
+
     if (trace) {
       trace(null, sql.toString()); 
     }
