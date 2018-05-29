@@ -326,8 +326,8 @@ public class Stmt {
     // FIXME: Workaround to create ACID temporary table
     String[] tableNamePart = identCtx.getText().split("__");
     if (tableNamePart.length >= 3 && tableNamePart[0].equalsIgnoreCase("acid")) {
-      sql.append("\nSTORED AS ORC")
-          .append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 1 BUCKETS")
+      sql.append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 1 BUCKETS")
+          .append("\nSTORED AS ORC")
           .append("\nTBLPROPERTIES ('transactional'='true')");
     }
 
