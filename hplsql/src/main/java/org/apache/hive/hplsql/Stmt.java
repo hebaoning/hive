@@ -955,8 +955,27 @@ public class Stmt {
       }      
     }    
     return 0; 
-  } 
-  
+  }
+
+  /**
+   * LOOP statement
+   */
+  public Integer loop_(HplsqlParser.Loop_stmtContext ctx) {
+    trace(ctx, "LOOP - ENTERED");
+    String label = exec.labelPop();
+    while (true) {
+      exec.enterScope(Scope.Type.LOOP);
+      visit(ctx.block());
+      exec.leaveScope();
+      if (canContinue(label)) {
+        continue;
+      }
+      break;
+    }
+    trace(ctx, "LOOP - LEFT");
+    return 0;
+  }
+
   /**
    * WHILE statement
    */

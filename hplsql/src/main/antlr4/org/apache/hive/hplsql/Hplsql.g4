@@ -96,6 +96,7 @@ stmt :
      | use_stmt
      | truncate_stmt
      | values_into_stmt
+     | loop_stmt
      | while_stmt
      | label    
      | hive     
@@ -753,6 +754,10 @@ use_stmt :              // USE statement
      
 values_into_stmt :     // VALUES INTO statement
        T_VALUES T_OPEN_P? expr (T_COMMA expr)* T_CLOSE_P? T_INTO T_OPEN_P? ident (T_COMMA ident)* T_CLOSE_P? 
+     ;
+
+loop_stmt :            // WHILE loop statement
+       T_LOOP block T_END T_LOOP
      ;
 
 while_stmt :            // WHILE loop statement

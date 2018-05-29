@@ -1847,8 +1847,16 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   @Override 
   public Integer visitValues_into_stmt(HplsqlParser.Values_into_stmtContext ctx) { 
     return exec.stmt.values(ctx); 
-  }  
-  
+  }
+
+  /**
+   * LOOP statement
+   */
+  @Override
+  public Integer visitLoop_stmt(HplsqlParser.Loop_stmtContext ctx) {
+    return exec.stmt.loop_(ctx);
+  }
+
   /**
    * WHILE statement
    */
