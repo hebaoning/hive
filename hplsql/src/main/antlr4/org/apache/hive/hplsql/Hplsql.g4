@@ -325,6 +325,9 @@ create_table_options_td_item :
 create_table_options_hive_item :
        create_table_hive_row_format
      | T_STORED T_AS ident
+     | T_PARTITIONED T_BY create_routine_params
+     | T_CLUSTERED T_BY T_OPEN_P ident T_CLOSE_P (T_SORTED T_BY T_OPEN_P ident T_CLOSE_P)? T_INTO L_INT T_BUCKETS
+     | T_TBLPROPERTIES T_OPEN_P ident T_EQUAL expr (T_COMMA ident T_EQUAL expr)* T_CLOSE_P
      ;
      
 create_table_hive_row_format :
@@ -1596,6 +1599,7 @@ T_BINARY_INTEGER  : B I N A R Y '_' I N T E G E R ;
 T_BIT             : B I T ;
 T_BODY            : B O D Y ; 
 T_BREAK           : B R E A K ;
+T_BUCKETS         : B U C K E T S ;
 T_BY              : B Y ;
 T_BYTE            : B Y T E ; 
 T_CALL            : C A L L ;
@@ -1784,6 +1788,7 @@ T_OVERWRITE       : O V E R W R I T E ;
 T_OWNER           : O W N E R ; 
 T_PACKAGE         : P A C K A G E ; 
 T_PARTITION       : P A R T I T I O N ;
+T_PARTITIONED     : P A R T I T I O N E D;
 T_PATH            : P A T H ;
 T_PCTFREE         : P C T F R E E ; 
 T_PCTUSED         : P C T U S E D ;
@@ -1840,6 +1845,7 @@ T_SIMPLE_FLOAT    : S I M P L E '_' F L O A T ;
 T_SIMPLE_INTEGER  : S I M P L E '_' I N T E G E R ;
 T_SMALLDATETIME   : S M A L L D A T E T I M E ;
 T_SMALLINT        : S M A L L I N T ;
+T_SORTED          : S O R T E D ;
 T_SQL             : S Q L ; 
 T_SQLEXCEPTION    : S Q L E X C E P T I O N ;
 T_SQLINSERT       : S Q L I N S E R T ;
@@ -1857,7 +1863,8 @@ T_SUM             : S U M ;
 T_SUMMARY         : S U M M A R Y ;
 T_SYS_REFCURSOR   : S Y S '_' R E F C U R S O R ; 
 T_TABLE           : T A B L E ;
-T_TABLESPACE      : T A B L E S P A C E ; 
+T_TABLESPACE      : T A B L E S P A C E ;
+T_TBLPROPERTIES   : T B L P R O P E R T I E S ;
 T_TEMPORARY       : T E M P O R A R Y ;
 T_TERMINATED      : T E R M I N A T E D ; 
 T_TEXTIMAGE_ON    : T E X T I M A G E '_' O N ;
