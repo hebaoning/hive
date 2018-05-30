@@ -497,7 +497,17 @@ create_routine_options :
        create_routine_option+
      ;
 create_routine_option :
-       T_LANGUAGE T_SQL       
+       T_LANGUAGE T_SQL
+     | T_SPECIFIC ident
+     | (T_MODIFIES | T_CONTAINS | T_READS) T_SQL T_DATA?
+     | T_NOT? T_DETERMINISTIC
+     | T_CALLED T_ON T_NULL T_INPUT
+     | T_AUTONOMOUS
+     | T_COMMIT T_ON T_RETURN (T_YES | T_NO)
+     | T_INHERIT T_SPECIAL T_REGISTERS
+     | (T_OLD | T_NEW) T_SAVEPOINT T_LEVEL
+     | T_NO? T_EXTERNAL T_ACTION
+     | T_PARAMETER T_CCSID (T_ASCII | T_UNICODE)
      | T_SQL T_SECURITY (T_CREATOR | T_DEFINER | T_INVOKER | T_OWNER)
      | T_DYNAMIC? T_RESULT T_SETS L_INT
      ;
@@ -1590,9 +1600,11 @@ T_ANSI_NULLS      : A N S I '_' N U L L S ;
 T_ANSI_PADDING    : A N S I '_' P A D D I N G ;
 T_AS              : A S ;
 T_ASC             : A S C ;
+T_ASCII           : A S C I I ;
 T_ASSOCIATE       : A S S O C I A T E ; 
 T_AT              : A T ;
 T_AUTO_INCREMENT  : A U T O '_' I N C R E M E N T ;
+T_AUTONOMOUS      : A U T O N O M O U S ;
 T_AVG             : A V G ; 
 T_BATCHSIZE       : B A T C H S I Z E ;
 T_BEGIN           : B E G I N ;
@@ -1608,11 +1620,13 @@ T_BUCKETS         : B U C K E T S ;
 T_BY              : B Y ;
 T_BYTE            : B Y T E ; 
 T_CALL            : C A L L ;
+T_CALLED          : C A L L E D ;
 T_CALLER          : C A L L E R ;
 T_CASCADE         : C A S C A D E ; 
 T_CASE            : C A S E ;
 T_CASESPECIFIC    : C A S E S P E C I F I C ; 
 T_CAST            : C A S T ;
+T_CCSID           : C C S I D ;
 T_CHAR            : C H A R ;
 T_CHARACTER       : C H A R A C T E R ;
 T_CHARSET         : C H A R S E T ;
@@ -1625,6 +1639,7 @@ T_COLLECTION      : C O L L E C T I O N ;
 T_COLUMN          : C O L U M N ;
 T_COMMENT         : C O M M E N T;
 T_CONSTANT        : C O N S T A N T ;
+T_CONTAINS        : C O N T A I N S ;
 T_COMMIT          : C O M M I T ; 
 T_COMPRESS        : C O M P R E S S ;
 T_CONCAT          : C O N C A T;
@@ -1659,7 +1674,8 @@ T_DELETE          : D E L E T E ;
 T_DELIMITED       : D E L I M I T E D ; 
 T_DELIMITER       : D E L I M I T E R ; 
 T_DESC            : D E S C ;
-T_DESCRIBE        : D E S C R I B E ; 
+T_DESCRIBE        : D E S C R I B E ;
+T_DETERMINISTIC   : D E T E R M I N I S T I C ;
 T_DIAGNOSTICS     : D I A G N O S T I C S ;
 T_DIR             : D I R ;
 T_DIRECTORY       : D I R E C T O R Y ; 
@@ -1680,7 +1696,8 @@ T_EXCEPT          : E X C E P T ;
 T_EXEC            : E X E C ;
 T_EXECUTE         : E X E C U T E ;
 T_EXCEPTION       : E X C E P T I O N ;
-T_EXCLUSIVE       : E X C L U S I V E ; 
+T_EXCLUSIVE       : E X C L U S I V E ;
+T_EXTERNAL        : E X T E R N A L;
 T_EXISTS          : E X I S T S ; 
 T_EXIT            : E X I T ;
 T_FALLBACK        : F A L L B A C K ;
@@ -1717,9 +1734,11 @@ T_IMMEDIATE       : I M M E D I A T E ;
 T_IN              : I N ;
 T_INCLUDE         : I N C L U D E ;
 T_INDEX           : I N D E X ;
+T_INHERIT         : I N H E R I T ;
 T_INITRANS        : I N I T R A N S ;
-T_INNER           : I N N E R ; 
+T_INNER           : I N N E R ;
 T_INOUT           : I N O U T;
+T_INPUT           : I N P U T ;
 T_INSERT          : I N S E R T ;
 T_INT             : I N T ;
 T_INT2            : I N T '2';
@@ -1740,6 +1759,7 @@ T_KEYS            : K E Y S ;
 T_LANGUAGE        : L A N G U A G E ;
 T_LEAVE           : L E A V E ;
 T_LEFT            : L E F T ;
+T_LEVEL           : L E V E L ;
 T_LIKE            : L I K E ; 
 T_LIMIT           : L I M I T ;
 T_LINES           : L I N E S ; 
@@ -1763,6 +1783,7 @@ T_MICROSECONDS    : M I C R O S E C O N D S;
 T_MIN             : M I N ;
 T_MINUTE          : M I N U T E ;
 T_MINUTES         : M I N U T E S ;
+T_MODIFIES        : M O D I F I E S ;
 T_MONTH           : M O N T H ;
 T_MONTHS          : M O N T H S ;
 T_MULTISET        : M U L T I S E T ; 
@@ -1781,6 +1802,7 @@ T_NUMERIC         : N U M E R I C ;
 T_NUMBER          : N U M B E R ;
 T_OBJECT          : O B J E C T ; 
 T_OFF             : O F F ;
+T_OLD             : O L D ;
 T_ON              : O N ;
 T_ONLY            : O N L Y ;
 T_OPEN            : O P E N ;
@@ -1790,7 +1812,8 @@ T_OUT             : O U T ;
 T_OUTER           : O U T E R ;
 T_OVER            : O V E R ;
 T_OVERWRITE       : O V E R W R I T E ; 
-T_OWNER           : O W N E R ; 
+T_OWNER           : O W N E R ;
+T_PARAMETER       : P A R A M E T E R ;
 T_PACKAGE         : P A C K A G E ; 
 T_PARTITION       : P A R T I T I O N ;
 T_PARTITIONED     : P A R T I T I O N E D;
@@ -1809,8 +1832,10 @@ T_QUERY_BAND      : Q U E R Y '_' B A N D ;
 T_QUIT            : Q U I T ; 
 T_QUOTED_IDENTIFIER : Q U O T E D '_' I D E N T I F I E R ;
 T_RAISE           : R A I S E ;
+T_READS           : R E A D S ;
 T_REAL            : R E A L ; 
-T_REFERENCES      : R E F E R E N C E S ; 
+T_REFERENCES      : R E F E R E N C E S ;
+T_REGISTERS       : R E G I S T E R S ;
 T_REGEXP          : R E G E X P ;
 T_REPLACE         : R E P L A C E ; 
 T_RESIGNAL        : R E S I G N A L ;
@@ -1832,6 +1857,7 @@ T_RR              : R R;
 T_RS              : R S ;
 T_PWD             : P W D ; 
 T_TRIM            : T R I M ;
+T_SAVEPOINT       : S A V E P O I N T ;
 T_SCHEMA          : S C H E M A ;
 T_SECOND          : S E C O N D ;
 T_SECONDS         : S E C O N D S;
@@ -1851,6 +1877,8 @@ T_SIMPLE_INTEGER  : S I M P L E '_' I N T E G E R ;
 T_SMALLDATETIME   : S M A L L D A T E T I M E ;
 T_SMALLINT        : S M A L L I N T ;
 T_SORTED          : S O R T E D ;
+T_SPECIFIC        : S P E C I F I C ;
+T_SPECIAL         : S P E C I A L ;
 T_SQL             : S Q L ; 
 T_SQLEXCEPTION    : S Q L E X C E P T I O N ;
 T_SQLINSERT       : S Q L I N S E R T ;
@@ -1882,7 +1910,8 @@ T_TOP             : T O P ;
 T_TRANSACTION     : T R A N S A C T I O N ;
 T_TRUE            : T R U E ;
 T_TRUNCATE        : T R U N C A T E;
-T_TYPE            : T Y P E ; 
+T_TYPE            : T Y P E ;
+T_UNICODE         : U N I C O D E ;
 T_UNION           : U N I O N ;
 T_UNIQUE          : U N I Q U E ;
 T_UPDATE          : U P D A T E ; 
