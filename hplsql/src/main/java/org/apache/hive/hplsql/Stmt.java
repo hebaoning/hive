@@ -304,9 +304,18 @@ public class Stmt {
     if (optCtx != null) {
       last = optCtx.stop;
     }
+    // FIXME: Workaround to create ACID temporary table
+    String[] tableNamePart = identCtx.getText().split("__");
+    boolean enableAcid = tableNamePart.length >= 3 && tableNamePart[0].equalsIgnoreCase("acid");
+
     if (conf.tempTables == Conf.TempTables.NATIVE) {
       sql.append("CREATE TEMPORARY TABLE " + name);
       sql.append(createTableDefinition(defCtx, last));
+      if (enableAcid) {
+        sql.append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 1 BUCKETS")
+            .append("\nSTORED AS ORC")
+            .append("\nTBLPROPERTIES ('transactional'='true')");
+      }
     } 
     else if (conf.tempTables == Conf.TempTables.MANAGED) {
       managedName = name + "_" + UUID.randomUUID().toString().replace("-","");
@@ -315,20 +324,20 @@ public class Stmt {
       }      
       sql.append("CREATE TABLE " + managedName);
       sql.append(createTableDefinition(defCtx, last));
+      // keep property order
+      if (enableAcid) {
+        sql.append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 1 BUCKETS")
+            .append("\nSTORED AS ORC");
+      }
       if (!conf.tempTablesLocation.isEmpty()) {
         sql.append("\nLOCATION '" + conf.tempTablesLocation + "/" + managedName + "'");
+      }
+      if (enableAcid) {
+        sql.append("\nTBLPROPERTIES ('transactional'='true')");
       }
       if (trace) {
         trace(null, "Managed table name: " + managedName);
       }
-    }
-
-    // FIXME: Workaround to create ACID temporary table
-    String[] tableNamePart = identCtx.getText().split("__");
-    if (tableNamePart.length >= 3 && tableNamePart[0].equalsIgnoreCase("acid")) {
-      sql.append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 1 BUCKETS")
-          .append("\nSTORED AS ORC")
-          .append("\nTBLPROPERTIES ('transactional'='true')");
     }
 
     if (trace) {
