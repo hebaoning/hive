@@ -126,7 +126,22 @@ public class Function {
    * Aggregate or window function in a SQL query
    */
   public void execAggWindowSql(HplsqlParser.Expr_agg_window_funcContext ctx) {
-    exec.stackPush(exec.getFormattedText(ctx));
+    if (ctx.T_MAX() != null || ctx.T_MIN() != null
+        || ctx.T_AVG() != null || ctx.T_SUM() != null || ctx.T_STDEV() != null
+        || ctx.T_VAR() != null || ctx.T_VARIANCE() != null) {
+      StringBuilder sql = new StringBuilder();
+      sql.append(ctx.getStart().getText()).append("(");
+      if (ctx.expr_func_all_distinct() != null) {
+        sql.append(exec.getFormattedText(ctx.expr_func_all_distinct()));
+      }
+      sql.append(" ").append(evalPop(ctx.expr(0)).toString()).append(")");
+      if (ctx.expr_func_over_clause() != null) {
+        sql.append(exec.getFormattedText(ctx.expr_func_over_clause()));
+      }
+      exec.stackPush(sql);
+    } else {
+      exec.stackPush(exec.getFormattedText(ctx));
+    }
   }
   
   /**
