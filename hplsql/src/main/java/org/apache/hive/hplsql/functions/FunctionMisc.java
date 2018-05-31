@@ -24,10 +24,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.hive.hplsql.*;
 
 public class FunctionMisc extends Function {
+
+  private static final Pattern LOAD_FROM_PATTERN =
+      Pattern.compile("LOAD +FROM +\\((.*)\\) +OF +CURSOR +(INSERT +INTO .*)");
+
   public FunctionMisc(Exec e) {
     super(e);
   }
@@ -46,6 +52,7 @@ public class FunctionMisc extends Function {
     f.map.put("INTEGER", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
     f.map.put("INT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
     f.map.put("ABS", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { abs(ctx); }});
+    f.map.put("_ADMIN_CMD", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { adminCmd(ctx); }});
 
     f.specMap.put("ACTIVITY_COUNT", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { activityCount(ctx); }});
     f.specMap.put("CAST", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { cast(ctx); }});
@@ -176,6 +183,22 @@ public class FunctionMisc extends Function {
       Var v = evalPop(ctx.func_param(0).expr());
       evalInt(v.intValue());
       return;
+    }
+    evalNull();
+  }
+
+  /**
+   * INTEGER function - Returns an integer representation of either a number or a character string
+   */
+  void adminCmd(HplsqlParser.Expr_func_paramsContext ctx) {
+    if (ctx.func_param().size() == 1) {
+      String cmd = evalPop(ctx.func_param(0).expr()).toString();
+      // do magic
+      Matcher m = LOAD_FROM_PATTERN.matcher(cmd);
+      if (m.matches() && m.groupCount() == 2) {
+        exec.stackPush(m.group(2) + " " + m.group(1));
+        return;
+      }
     }
     evalNull();
   }
