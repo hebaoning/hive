@@ -42,25 +42,9 @@ public class Utils {
 	  if(s == null) {
 		  return null;
 	  }
-	  
-	  int len = s.length();
-	  StringBuilder s2 = new StringBuilder(len);	  
-	  
-	  for (int i = 0; i < len; i++) {
-		char ch = s.charAt(i);
-		char ch2 = (i < len - 1) ? s.charAt(i+1) : 0;
-		  
-	    if((i == 0 || i == len -1) && (ch == '\'' || ch == '"'))
-	      continue;
-	    else
-	    // \' and '' escape sequences
-	    if((ch == '\\' && ch2 == '\'') || (ch == '\'' && ch2 == '\''))
-	      continue;
-	    
-	    s2.append(ch);	
-	  }
-	  
-	  return s2.toString();
+    s = s.replaceAll("^['\"]|['\"]$", "")
+        .replaceAll("''|\\'", "'");
+    return s;
   }
 
   /**
