@@ -296,10 +296,14 @@ public class FunctionString extends Function {
 
     if (cnt == 2) {
       Var v1 = evalPop(ctx.func_param(0).expr());
-      if (v1.type == Var.Type.TIMESTAMP) {
+      if (v1.type == Var.Type.TIMESTAMP || v1.type == Var.Type.DATE) {
         String sqlFormat = evalPop(ctx.func_param(1).expr()).toString();
         String format = Utils.convertSqlDatetimeFormat(sqlFormat);
-        evalString(new SimpleDateFormat(format).format(v1.timestampValue()));
+        if (v1.type == Var.Type.TIMESTAMP) {
+          evalString(new SimpleDateFormat(format).format(v1.timestampValue()));
+        } else {
+          evalString(new SimpleDateFormat(format).format(v1.dateValue()));
+        }
         return;
       }
     }
