@@ -1561,6 +1561,7 @@ non_reserved_words :                      // Tokens that are not reserved words 
      | T_TRIM
      | T_TRUE
      | T_TRUNCATE
+     | T_TYPE
      // T_UNION reserved word   
      | T_UNIQUE     
      | T_UPDATE  
