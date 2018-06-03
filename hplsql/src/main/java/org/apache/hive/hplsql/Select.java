@@ -288,7 +288,7 @@ public class Select {
     exec.buildSql = true;
 
     List<String> rowValues = ctx.select_list_item().stream()
-        .map(it -> StringUtils.strip(evalPop(it).toString(), "`\""))
+        .map(it -> evalPop(it).toString())
         .collect(Collectors.toList());
      trace(ctx, "org row values: " + StringUtils.join(rowValues, ","));
 
