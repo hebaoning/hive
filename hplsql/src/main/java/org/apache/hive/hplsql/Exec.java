@@ -2455,6 +2455,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
         List<String> identNames = ctx.insert_stmt_cols().ident().stream()
             .map(HplsqlParser.IdentContext::getText).collect(Collectors.toList());
         List<String> columnNames = meta.getColumnNames(ctx, exec.conf.defaultConnection, tableName);
+        trace(ctx, "build row values");
         rowValues = buildRowValues(columnNames, identNames, rowValues);
       }
       sql.append(" VALUES (").append(StringUtils.join(rowValues, ",")).append(")");
