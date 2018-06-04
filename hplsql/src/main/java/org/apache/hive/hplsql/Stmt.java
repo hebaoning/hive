@@ -1256,7 +1256,10 @@ public class Stmt {
     String sql = sqlBuilder.toString();
     if (ctx.update_alias() != null) {
       String tableName = evalPop(ctx.update_table().table_name()).toString();
-      sql = sql.replace(alias + ".", tableName + ".");
+      // FIXME: Hive do not support schema.table.column
+      if (!tableName.contains(".")) {
+        sql = sql.replace(alias + ".", tableName + ".");
+      }
     }
     exec.buildSql = oldBuildSql;
 
