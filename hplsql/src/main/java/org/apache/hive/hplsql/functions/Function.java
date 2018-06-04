@@ -450,15 +450,29 @@ public class Function {
     FuncSpecCommand func = specSqlMap.get(name);    
     if (func != null) {
       func.run(ctx);
-    }
-    else {
+    } else if (ctx.T_CAST() != null) {
+      execCastSql(ctx);
+    } else {
       exec.stackPush(exec.getFormattedText(ctx));
     }
   }
-  
-  /**
-   * Get the current date
-   */
+
+  void execCastSql(HplsqlParser.Expr_spec_funcContext ctx) {
+    StringBuilder sql = new StringBuilder();
+    sql.append("CAST(")
+        .append(evalPop(ctx.expr(0)).toString())
+        .append(" AS ")
+        .append(ctx.dtype().getText());
+    if (ctx.dtype_len() != null) {
+      sql.append(ctx.dtype_len().getText());
+    }
+    sql.append(")");
+    exec.stackPush(sql);
+  }
+
+    /**
+     * Get the current date
+     */
   public void execCurrentDate(HplsqlParser.Expr_spec_funcContext ctx) {
     if(trace) {
       trace(ctx, "CURRENT_DATE");
