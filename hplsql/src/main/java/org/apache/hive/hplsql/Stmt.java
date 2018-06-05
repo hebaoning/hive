@@ -729,7 +729,38 @@ public class Stmt {
     }
     return 0; 
   }
-  
+
+  /**
+   * SQL INSERT statement
+   */
+  public Integer multipleInsert(HplsqlParser.Multiple_insert_stmtContext ctx) {
+    boolean oldBuildSql = exec.buildSql;
+    exec.buildSql = true;
+    StringBuilder sql = new StringBuilder();
+    sql.append(evalPop(ctx.from_clause()).toString());
+    for (int i = 0; i < ctx.insert_stmt().size(); i++) {
+      sql.append("\n").append(evalPop(ctx.insert_stmt(i)).toString());
+    }
+    exec.buildSql = oldBuildSql;
+
+    String sqlString = sql.toString();
+    trace(ctx, sqlString);
+
+    if (exec.buildSql) {
+      exec.stackPush(sqlString);
+      return 0;
+    }
+
+    Query query = exec.executeSql(ctx, sqlString, exec.conf.defaultConnection);
+    if (query.error()) {
+      exec.signal(query);
+      return 1;
+    }
+    exec.setSqlSuccess();
+    exec.closeQuery(query, exec.conf.defaultConnection);
+    return 0;
+  }
+
   /**
    * SQL INSERT statement
    */

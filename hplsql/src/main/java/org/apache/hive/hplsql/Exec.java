@@ -1154,9 +1154,12 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     StringBuilder sql = new StringBuilder();
     boolean oldBuildSql = exec.buildSql;
     exec.buildSql = true;
-    sql.append(evalPop(ctx.cte_select_stmt()).toString())
-        .append(" ")
-        .append(evalPop(ctx.insert_stmt()).toString());
+    sql.append(evalPop(ctx.cte_select_stmt()).toString()).append("\n");
+    if (ctx.insert_stmt() != null) {
+      sql.append(evalPop(ctx.insert_stmt()).toString());
+    } else {
+      sql.append(evalPop(ctx.multiple_insert_stmt()).toString());
+    }
     exec.buildSql = oldBuildSql;
 
     String sqlString = sql.toString();
@@ -1169,6 +1172,14 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     exec.setSqlSuccess();
     exec.closeQuery(query, exec.conf.defaultConnection);
     return 0;
+  }
+
+  /**
+   * Multiple SQL INSERT statement
+   */
+  @Override
+  public Integer visitMultiple_insert_stmt(HplsqlParser.Multiple_insert_stmtContext ctx) {
+    return exec.stmt.multipleInsert(ctx);
   }
 
   /**

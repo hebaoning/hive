@@ -75,6 +75,7 @@ stmt :
      | if_stmt     
      | include_stmt
      | cte_insert_stmt
+     | multiple_insert_stmt
      | insert_stmt
      | insert_directory_stmt
      | get_diag_stmt
@@ -556,7 +557,11 @@ include_stmt :          // INCLUDE statement
      ;  
 
 cte_insert_stmt :
-       cte_select_stmt insert_stmt
+       cte_select_stmt (insert_stmt | multiple_insert_stmt)
+     ;
+
+multiple_insert_stmt :
+       from_clause insert_stmt+
      ;
 
 insert_stmt :           // INSERT statement
