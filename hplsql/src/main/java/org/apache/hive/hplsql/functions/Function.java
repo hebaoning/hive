@@ -139,6 +139,23 @@ public class Function {
         sql.append(exec.getFormattedText(ctx.expr_func_over_clause()));
       }
       exec.stackPush(sql);
+    } else if (ctx.T_COUNT() != null || ctx.T_COUNT_BIG() != null) {
+      // T_COUNT T_OPEN_P ((expr_func_all_distinct? expr) | '*') T_CLOSE_P expr_func_over_clause?
+      StringBuilder sql = new StringBuilder();
+      sql.append(ctx.getStart().getText()).append("(");
+      if (ctx.expr().size() > 0) {
+        if (ctx.expr_func_all_distinct() != null) {
+          sql.append(exec.getFormattedText(ctx.expr_func_all_distinct())).append(" ");
+        }
+        sql.append(evalPop(ctx.expr(0)).toString());
+      } else {
+        sql.append("*");
+      }
+      sql.append(")");
+      if (ctx.expr_func_over_clause() != null) {
+        sql.append(exec.getFormattedText(ctx.expr_func_over_clause()));
+      }
+      exec.stackPush(sql);
     } else {
       exec.stackPush(exec.getFormattedText(ctx));
     }
@@ -452,6 +469,8 @@ public class Function {
       func.run(ctx);
     } else if (ctx.T_CAST() != null) {
       execCastSql(ctx);
+    } else if (ctx.T_COUNT() != null) {
+      execCountSql(ctx);
     } else {
       exec.stackPush(exec.getFormattedText(ctx));
     }
@@ -465,6 +484,18 @@ public class Function {
         .append(ctx.dtype().getText());
     if (ctx.dtype_len() != null) {
       sql.append(ctx.dtype_len().getText());
+    }
+    sql.append(")");
+    exec.stackPush(sql);
+  }
+
+  void execCountSql(HplsqlParser.Expr_spec_funcContext ctx) {
+    StringBuilder sql = new StringBuilder();
+    sql.append("COUNT(");
+    if (ctx.expr().size() > 0) {
+      sql.append(evalPop(ctx.expr(0)).toString());
+    } else {
+      sql.append("*");
     }
     sql.append(")");
     exec.stackPush(sql);
