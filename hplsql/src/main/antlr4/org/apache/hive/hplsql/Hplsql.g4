@@ -683,12 +683,17 @@ commit_stmt :           // COMMIT statement
      ;
      
 create_index_stmt :     // CREATE INDEX statement
-       T_CREATE T_UNIQUE? T_INDEX ident T_ON table_name T_OPEN_P create_index_col (T_COMMA create_index_col)* T_CLOSE_P
+       T_CREATE T_UNIQUE? T_INDEX ident T_ON table_name T_OPEN_P create_index_col (T_COMMA create_index_col)* T_CLOSE_P create_index_option*
      ;
      
 create_index_col : 
        ident (T_ASC | T_DESC)?
      ;
+
+create_index_option :
+       T_ALLOW T_REVERSE T_SCANS
+     | T_COMPRESS T_YES
+    ;
      
 index_storage_clause :
       index_mssql_storage_clause
@@ -1600,6 +1605,7 @@ T_ACTION          : A C T I O N ;
 T_ADD2            : A D D ;
 T_ALL             : A L L ;
 T_ALLOCATE        : A L L O C A T E ;
+T_ALLOW           : A L L O W ;
 T_ALTER           : A L T E R ;
 T_AND             : A N D ;
 T_ANSI_NULLS      : A N S I '_' N U L L S ;
@@ -1864,6 +1870,7 @@ T_RS              : R S ;
 T_PWD             : P W D ; 
 T_TRIM            : T R I M ;
 T_SAVEPOINT       : S A V E P O I N T ;
+T_SCANS           : S C A N S ;
 T_SCHEMA          : S C H E M A ;
 T_SECOND          : S E C O N D ;
 T_SECONDS         : S E C O N D S;
