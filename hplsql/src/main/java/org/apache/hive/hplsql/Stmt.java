@@ -304,39 +304,28 @@ public class Stmt {
     if (optCtx != null) {
       last = optCtx.stop;
     }
-    // FIXME: Workaround to create ACID temporary table
-    String[] tableNamePart = identCtx.getText().split("__");
-    boolean enableAcid = tableNamePart.length >= 3 && tableNamePart[0].equalsIgnoreCase("acid");
 
     if (conf.tempTables == Conf.TempTables.NATIVE) {
       sql.append("CREATE TEMPORARY TABLE " + name);
       sql.append(createTableDefinition(defCtx, last));
-      if (enableAcid) {
-        sql.append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 1 BUCKETS")
-            .append("\nSTORED AS ORC")
-            .append("\nTBLPROPERTIES ('transactional'='true')");
-      }
+      appendTableOptions(sql, identCtx.getText(), conf.tempTablesLocation + "/" + name);
     } 
     else if (conf.tempTables == Conf.TempTables.MANAGED) {
       managedName = name + "_" + UUID.randomUUID().toString().replace("-","");
       if (!conf.tempTablesSchema.isEmpty()) {
         managedName = conf.tempTablesSchema + "." + managedName;
-      }      
-      sql.append("CREATE TABLE " + managedName);
-      sql.append(createTableDefinition(defCtx, last));
-      // keep property order
-      if (enableAcid) {
-        sql.append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 1 BUCKETS")
-            .append("\nSTORED AS ORC");
-      }
-      if (!conf.tempTablesLocation.isEmpty()) {
-        sql.append("\nLOCATION '" + conf.tempTablesLocation + "/" + managedName + "'");
-      }
-      if (enableAcid) {
-        sql.append("\nTBLPROPERTIES ('transactional'='true')");
       }
       if (trace) {
         trace(null, "Managed table name: " + managedName);
+      }
+
+      sql.append("CREATE TABLE " + managedName);
+      if (defCtx.T_AS() != null) {
+        appendTableOptions(sql, identCtx.getText(), conf.tempTablesLocation + "/" + managedName);
+      }
+      sql.append(createTableDefinition(defCtx, last));
+      if (defCtx.T_AS() == null) {
+        appendTableOptions(sql, identCtx.getText(), conf.tempTablesLocation + "/" + managedName);
       }
     }
 
@@ -357,7 +346,24 @@ public class Stmt {
     }    
     return 0; 
   }
-  
+
+  private void appendTableOptions(StringBuilder sql, String tableName, String location) {
+    // FIXME: Workaround to create ACID temporary table
+    String[] tableNamePart = tableName.split("__");
+    boolean enableAcid = tableNamePart.length >= 3 && tableNamePart[0].equalsIgnoreCase("acid");
+    // keep this order
+    if (enableAcid) {
+      sql.append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 1 BUCKETS")
+          .append("\nSTORED AS ORC");
+    }
+    if (!conf.tempTablesLocation.isEmpty()) {
+      sql.append("\nLOCATION '").append(location).append("'");
+    }
+    if (enableAcid) {
+      sql.append("\nTBLPROPERTIES ('transactional'='true')");
+    }
+  }
+
   /**
    * DESCRIBE statement
    */
