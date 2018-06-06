@@ -290,7 +290,7 @@ public class Select {
     List<String> rowValues = ctx.select_list_item().stream()
         .map(it -> evalPop(it).toString())
         .collect(Collectors.toList());
-     trace(ctx, "org row values: " + StringUtils.join(rowValues, ","));
+     trace(ctx, "select list: " + StringUtils.join(rowValues, ","));
 
     HplsqlParser.Insert_stmtContext insertStmtContext =
         (HplsqlParser.Insert_stmtContext)ctx.parent.parent.parent.parent.parent;
@@ -307,11 +307,19 @@ public class Select {
 
     if (identNames != columnNames) {
       rowValues = buildRowValues(columnNames, identNames, rowValues);
-      trace(ctx, tableName + " rows: " + StringUtils.join(rowValues, ","));
+      trace(ctx, "new select list: " + StringUtils.join(rowValues, ","));
     }
 
     exec.buildSql = oldBuildSql;
-    exec.stackPush(StringUtils.join(rowValues, ","));
+
+    if (ctx.select_list_set() != null) {
+      StringBuilder sql = new StringBuilder();
+      sql.append(exec.getText(ctx.select_list_set()))
+          .append(" ").append(StringUtils.join(rowValues, ","));
+      exec.stackPush(sql);
+    } else {
+      exec.stackPush(StringUtils.join(rowValues, ","));
+    }
     return 0;
   }
 
