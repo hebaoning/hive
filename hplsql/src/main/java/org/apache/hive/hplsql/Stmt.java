@@ -308,7 +308,7 @@ public class Stmt {
     if (conf.tempTables == Conf.TempTables.NATIVE) {
       sql.append("CREATE TEMPORARY TABLE " + name);
       sql.append(createTableDefinition(defCtx, last));
-      appendTableOptions(sql, identCtx.getText(), conf.tempTablesLocation + "/" + name);
+      appendTableOptions(sql, identCtx.getText(), name, defCtx);
     } 
     else if (conf.tempTables == Conf.TempTables.MANAGED) {
       managedName = name + "_" + UUID.randomUUID().toString().replace("-","");
@@ -321,11 +321,11 @@ public class Stmt {
 
       sql.append("CREATE TABLE " + managedName);
       if (defCtx.T_AS() != null) {
-        appendTableOptions(sql, identCtx.getText(), conf.tempTablesLocation + "/" + managedName);
-      }
-      sql.append(createTableDefinition(defCtx, last));
-      if (defCtx.T_AS() == null) {
-        appendTableOptions(sql, identCtx.getText(), conf.tempTablesLocation + "/" + managedName);
+        appendTableOptions(sql, identCtx.getText(), managedName, defCtx);
+        sql.append(createTableDefinition(defCtx, last));
+      } else {
+        sql.append(createTableDefinition(defCtx, last));
+        appendTableOptions(sql, identCtx.getText(), managedName, defCtx);
       }
     }
 
@@ -347,17 +347,18 @@ public class Stmt {
     return 0; 
   }
 
-  private void appendTableOptions(StringBuilder sql, String tableName, String location) {
+  private void appendTableOptions(
+      StringBuilder sql, String tableName, String location, HplsqlParser.Create_table_definitionContext defCtx) {
     // FIXME: Workaround to create ACID temporary table
     String[] tableNamePart = tableName.split("__");
     boolean enableAcid = tableNamePart.length >= 3 && tableNamePart[0].equalsIgnoreCase("acid");
     // keep this order
-    if (enableAcid) {
+    if (enableAcid && defCtx.T_LIKE() == null) {
       sql.append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 1 BUCKETS")
           .append("\nSTORED AS ORC");
     }
     if (!conf.tempTablesLocation.isEmpty()) {
-      sql.append("\nLOCATION '").append(location).append("'");
+      sql.append("\nLOCATION '").append(conf.tempTablesLocation).append("/").append(location).append("'");
     }
     if (enableAcid) {
       sql.append("\nTBLPROPERTIES ('transactional'='true')");
