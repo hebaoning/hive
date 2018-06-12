@@ -33,6 +33,8 @@ public class FunctionMisc extends Function {
 
   private static final Pattern LOAD_FROM_PATTERN =
       Pattern.compile("LOAD +FROM +\\((.*)\\) +OF +CURSOR +(INSERT +INTO .*)");
+  private static final Pattern IMPORT_DEL_INTO_PATTERN =
+      Pattern.compile("IMPORT +FROM +/dev/null +OF +DEL +REPLACE +INTO +(.*)");
 
   public FunctionMisc(Exec e) {
     super(e);
@@ -197,6 +199,12 @@ public class FunctionMisc extends Function {
       Matcher m = LOAD_FROM_PATTERN.matcher(cmd);
       if (m.matches() && m.groupCount() == 2) {
         exec.stackPush(m.group(2) + " " + m.group(1));
+        return;
+      }
+
+      m = IMPORT_DEL_INTO_PATTERN.matcher(cmd);
+      if (m.matches() && m.groupCount() == 1) {
+        exec.stackPush("TRUNCATE TABLE " + m.group(1));
         return;
       }
     }
