@@ -1402,6 +1402,9 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
       }
       else if (conditionContext.T_NOT() != null && conditionContext.T_FOUND() != null) {
         type = Signal.Type.NOTFOUND;
+      } else if (conditionContext.T_SQLSTATE() != null) {
+        type = Signal.Type.USERDEFINED;
+        value = "sqlstate_" + evalPop(conditionContext.string()).toString();
       }
 
       if (!types.contains(type)) {

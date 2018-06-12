@@ -221,6 +221,7 @@ declare_handler_for_condition :
        T_SQLEXCEPTION
      | T_SQLWARNING
      | T_NOT T_FOUND
+     | T_SQLSTATE string
      | ident
      ;
      
