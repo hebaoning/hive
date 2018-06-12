@@ -1618,9 +1618,9 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     if (exec.buildSql) {
       StringBuilder sql = new StringBuilder();
       //FIXME: Workaround to support Hive assignment stmt syntax
-      sql.append(evalPop(ctx.ident(0))).append(" = ").append(evalPop(ctx.expr(0)));
+      sql.append(ctx.ident(0).getText()).append(" = ").append(evalPop(ctx.expr(0)));
       for (int i = 1; i < ctx.ident().size(); i++) {
-        sql.append(", ").append(evalPop(ctx.ident(i))).append(" = ").append(evalPop(ctx.expr(i)));
+        sql.append(", ").append(ctx.ident(i).getText()).append(" = ").append(evalPop(ctx.expr(i)));
       }
       /*
       sql.append("(").append(ctx.ident(0).getText());
