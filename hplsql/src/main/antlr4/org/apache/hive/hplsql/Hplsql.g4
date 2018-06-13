@@ -758,7 +758,7 @@ set_teradata_session_option :
      ;
      
 signal_stmt :          // SIGNAL statement
-       T_SIGNAL ident
+       T_SIGNAL ident string?
      ;
 
 summary_stmt :         // SUMMARY statement

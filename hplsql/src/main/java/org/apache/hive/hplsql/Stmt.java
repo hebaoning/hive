@@ -1413,7 +1413,12 @@ public class Stmt {
    */
   public Integer signal(HplsqlParser.Signal_stmtContext ctx) {
     trace(ctx, "SIGNAL");
-    Signal signal = new Signal(Signal.Type.USERDEFINED, ctx.ident().getText());
+    // FIXME: workaround to support "signal type value"
+    String ident = ctx.ident().getText();
+    if (ctx.string() != null) {
+      ident = ident + "_" + evalPop(ctx.string()).toString();
+    }
+    Signal signal = new Signal(Signal.Type.USERDEFINED, ident);
     exec.signal(signal);
     return 0; 
   }  
