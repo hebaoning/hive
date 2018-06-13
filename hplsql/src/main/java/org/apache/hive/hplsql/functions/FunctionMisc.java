@@ -32,9 +32,9 @@ import org.apache.hive.hplsql.*;
 public class FunctionMisc extends Function {
 
   private static final Pattern LOAD_FROM_PATTERN =
-      Pattern.compile("LOAD +FROM +\\((.*)\\) +OF +CURSOR +(INSERT +INTO .*)");
+      Pattern.compile("LOAD[ \t]+FROM[ \t]+\\((.*)\\)[ \t]+OF[ \t]+CURSOR[ \t]+(INSERT[ \t]+INTO[ \t].*)");
   private static final Pattern IMPORT_DEL_INTO_PATTERN =
-      Pattern.compile("IMPORT +FROM +/dev/null +OF +DEL +REPLACE +INTO +(.*)");
+      Pattern.compile("IMPORT[ \t]+FROM[ \t]+/dev/null[ \t]+OF[ \t]+DEL[ \t]+REPLACE[ \t]+INTO[ \t]+(.*)");
 
   public FunctionMisc(Exec e) {
     super(e);
@@ -193,22 +193,21 @@ public class FunctionMisc extends Function {
    * INTEGER function - Returns an integer representation of either a number or a character string
    */
   void adminCmd(HplsqlParser.Expr_func_paramsContext ctx) {
-    if (ctx.func_param().size() == 1) {
-      String cmd = evalPop(ctx.func_param(0).expr()).toString();
-      // do magic
-      Matcher m = LOAD_FROM_PATTERN.matcher(cmd);
-      if (m.matches() && m.groupCount() == 2) {
-        exec.stackPush(m.group(2) + " " + m.group(1));
-        return;
-      }
-
-      m = IMPORT_DEL_INTO_PATTERN.matcher(cmd);
-      if (m.matches() && m.groupCount() == 1) {
-        exec.stackPush("TRUNCATE TABLE " + m.group(1));
-        return;
-      }
+    String cmd = evalPop(ctx.func_param(0).expr()).toString();
+    // do magic
+    Matcher m = LOAD_FROM_PATTERN.matcher(cmd);
+    if (m.matches() && m.groupCount() == 2) {
+      exec.stackPush(m.group(2) + " " + m.group(1));
+      return;
     }
-    evalNull();
+
+    m = IMPORT_DEL_INTO_PATTERN.matcher(cmd);
+    if (m.matches() && m.groupCount() == 1) {
+      exec.stackPush("TRUNCATE TABLE " + m.group(1));
+      return;
+    }
+
+    exec.stackPush(cmd);
   }
 
   /**
