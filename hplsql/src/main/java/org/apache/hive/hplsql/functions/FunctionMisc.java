@@ -53,7 +53,7 @@ public class FunctionMisc extends Function {
     f.map.put("PART_COUNT_BY", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { partCountBy(ctx); }});
     f.map.put("INTEGER", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
     f.map.put("INT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
-    f.map.put("ABS", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { abs(ctx); }});
+    f.map.put("_ABS", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { abs(ctx); }});
     f.map.put("_ADMIN_CMD", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { adminCmd(ctx); }});
 
     f.specMap.put("ACTIVITY_COUNT", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { activityCount(ctx); }});
