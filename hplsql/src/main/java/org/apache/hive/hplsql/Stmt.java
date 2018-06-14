@@ -312,7 +312,7 @@ public class Stmt {
     } 
     else if (conf.tempTables == Conf.TempTables.MANAGED) {
       managedName = name + "_" + UUID.randomUUID().toString().replace("-","");
-      if (!conf.tempTablesSchema.isEmpty()) {
+      if (!conf.tempTablesSchema.isEmpty() && !name.contains(".")) {
         managedName = conf.tempTablesSchema + "." + managedName;
       }
       if (trace) {
