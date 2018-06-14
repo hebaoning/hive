@@ -1402,9 +1402,13 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
       }
       else if (conditionContext.T_NOT() != null && conditionContext.T_FOUND() != null) {
         type = Signal.Type.NOTFOUND;
-      } else if (conditionContext.T_SQLSTATE() != null) {
+      }
+      else if (conditionContext.T_SQLSTATE() != null) {
         type = Signal.Type.USERDEFINED;
         value = "sqlstate_" + evalPop(conditionContext.string()).toString();
+      }
+      else if (conditionContext.T_SQLWARNING() != null) {
+        type = Signal.Type.SQLWARNING;
       }
 
       if (!types.contains(type)) {
@@ -1412,7 +1416,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
         addHandler(new Handler(execType, type, value, exec.currentScope, ctx));
       }
       else {
-        error(ctx, "Duplicated type: " + type);
+        info(ctx, "Duplicated type: " + type);
       }
     }
     return 0;
