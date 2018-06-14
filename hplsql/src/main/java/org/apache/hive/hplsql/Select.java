@@ -211,6 +211,17 @@ public class Select {
     if (ctx.from_clause() != null) {
       exec.append(sql, evalPop(ctx.from_clause()).toString(), last, ctx.from_clause().getStart());
       last = ctx.from_clause().stop;
+      // FIXME
+      String orderByClause = findOrderByClause(ctx.select_list());
+      if (orderByClause != null) {
+        if (ctx.from_clause().from_table_clause().from_subselect_clause() != null) {
+          int idx = sql.lastIndexOf(")");
+          sql.insert(idx, " " + orderByClause);
+        } else {
+          // broke the parser ...
+          sql.append("unknown-within-clause:").append(orderByClause);
+        }
+      }
     } 
     else if (conf.dualTable != null) {
       sql.append(" FROM " + conf.dualTable);
@@ -246,6 +257,21 @@ public class Select {
     }
     exec.stackPush(sql);
     return 0; 
+  }
+
+  private String findOrderByClause(HplsqlParser.Select_listContext ctx) {
+    List<String> orderByList = ctx.select_list_item().stream()
+        .filter(item -> item.expr().expr_agg_window_func() != null && item.expr().expr_agg_window_func().expr_func_within_clause() != null)
+        .map(item -> getText(item.expr().expr_agg_window_func().expr_func_within_clause().order_by_clause()))
+        .collect(Collectors.toList());
+    if (orderByList.size() == 0) {
+      return null;
+    }
+    // handle only one order by clause
+    if (orderByList.size() == 1) {
+      return orderByList.get(0);
+    }
+    return "2-order-by-clause";
   }
   
   /**

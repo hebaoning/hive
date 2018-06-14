@@ -156,6 +156,15 @@ public class Function {
         sql.append(exec.getFormattedText(ctx.expr_func_over_clause()));
       }
       exec.stackPush(sql);
+    } else if (ctx.T_LISTAGG() != null) {
+      StringBuilder sql = new StringBuilder();
+      sql.append("concat_ws(")
+          .append(evalPop(ctx.expr(1)).toString())
+          .append(", collect_list(")
+          .append(evalPop(ctx.expr(0)).toString())
+          .append("))");
+      // handle with-clause in subselect
+      exec.stackPush(sql);
     } else {
       exec.stackPush(exec.getFormattedText(ctx));
     }

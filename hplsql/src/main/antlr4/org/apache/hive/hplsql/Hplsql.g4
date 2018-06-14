@@ -1149,6 +1149,7 @@ expr_agg_window_func :
      | T_SUM T_OPEN_P expr_func_all_distinct? expr T_CLOSE_P expr_func_over_clause?
      | T_VAR T_OPEN_P expr_func_all_distinct? expr T_CLOSE_P expr_func_over_clause?
      | T_VARIANCE T_OPEN_P expr_func_all_distinct? expr T_CLOSE_P expr_func_over_clause?
+     | T_LISTAGG T_OPEN_P expr T_COMMA expr T_CLOSE_P expr_func_within_clause?
      ; 
 
 expr_func_all_distinct :
@@ -1162,7 +1163,11 @@ expr_func_over_clause :
 
 expr_func_partition_by_clause :
        T_PARTITION T_BY expr (T_COMMA expr)*
-     ; 
+     ;
+
+expr_func_within_clause :
+       T_WITHIN T_GROUP T_OPEN_P order_by_clause T_CLOSE_P
+     ;
      
 expr_spec_func : 
        T_ACTIVITY_COUNT
@@ -1436,7 +1441,8 @@ non_reserved_words :                      // Tokens that are not reserved words 
      | T_LEFT     
      | T_LIKE 
      | T_LIMIT  
-     | T_LINES     
+     | T_LINES
+     | T_LISTAGG
      | T_LOCAL    
      | T_LOCATION 
      | T_LOCATOR
@@ -1775,7 +1781,8 @@ T_LEFT            : L E F T ;
 T_LEVEL           : L E V E L ;
 T_LIKE            : L I K E ; 
 T_LIMIT           : L I M I T ;
-T_LINES           : L I N E S ; 
+T_LINES           : L I N E S ;
+T_LISTAGG         : L I S T A G G ;
 T_LOCAL           : L O C A L ;
 T_LOCATION        : L O C A T I O N ;
 T_LOCATOR         : L O C A T O R ; 
@@ -1942,7 +1949,8 @@ T_VOLATILE        : V O L A T I L E ;
 T_WHEN            : W H E N ;
 T_WHERE           : W H E R E ;
 T_WHILE           : W H I L E ;
-T_WITH            : W I T H ; 
+T_WITH            : W I T H ;
+T_WITHIN          : W I T H I N;
 T_WITHOUT         : W I T H O U T ;
 T_WORK            : W O R K ;
 T_XACT_ABORT      : X A C T '_' A B O R T ;
