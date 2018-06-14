@@ -235,7 +235,12 @@ public class Select {
       last = ctx.group_by_clause().stop;
     }
     if (ctx.having_clause() != null) {
-      exec.append(sql, getText(ctx.having_clause()), last, ctx.having_clause().getStart());
+      // exec.append(sql, getText(ctx.having_clause()), last, ctx.having_clause().getStart());
+      sql.append(" HAVING ");
+      boolean oldBuildSql = exec.buildSql;
+      exec.buildSql = true;
+      sql.append(evalPop(ctx.having_clause().bool_expr()).toString());
+      exec.buildSql = oldBuildSql;
       last = ctx.having_clause().stop;
     }
     if (ctx.qualify_clause() != null) {
