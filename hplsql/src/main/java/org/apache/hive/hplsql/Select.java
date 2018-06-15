@@ -266,7 +266,8 @@ public class Select {
 
   private String findOrderByClause(HplsqlParser.Select_listContext ctx) {
     List<String> orderByList = ctx.select_list_item().stream()
-        .filter(item -> item.expr().expr_agg_window_func() != null && item.expr().expr_agg_window_func().expr_func_within_clause() != null)
+        .filter(item -> item.expr() != null && item.expr().expr_agg_window_func() != null
+            && item.expr().expr_agg_window_func().expr_func_within_clause() != null)
         .map(item -> getText(item.expr().expr_agg_window_func().expr_func_within_clause().order_by_clause()))
         .collect(Collectors.toList());
     if (orderByList.size() == 0) {
