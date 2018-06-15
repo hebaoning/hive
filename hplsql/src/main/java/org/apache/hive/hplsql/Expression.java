@@ -23,6 +23,7 @@ import java.math.RoundingMode;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.hive.hplsql.Var.Type;
@@ -257,7 +258,11 @@ public class Expression {
       singleInClauseSql(ctx.bool_expr_single_in(), sql);
     }
     else if (ctx.bool_expr_multi_in() != null) {
-      multiInClauseSql(ctx.bool_expr_multi_in(), sql);
+      if (isSimpleMultiInClause(ctx.bool_expr_multi_in())) {
+        convertMultiInClauseSql(ctx.bool_expr_multi_in(), sql);
+      } else {
+        multiInClauseSql(ctx.bool_expr_multi_in(), sql);
+      }
     }
     exec.stackPush(sql);
     return 0; 
@@ -306,6 +311,63 @@ public class Expression {
       sql.append(evalPop(ctx.select_stmt()));
     }
     sql.append(")");
+  }
+
+  public void convertMultiInClauseSql(HplsqlParser.Bool_expr_multi_inContext ctx, StringBuilder sql) {
+    if (ctx.T_NOT() != null) {
+      sql.append("NOT EXISTS(SELECT 1 FROM ");
+    } else {
+      sql.append("EXISTS(SELECT 1 FROM ");
+    }
+    HplsqlParser.Subselect_stmtContext subselectStmtContext =
+        ctx.select_stmt().fullselect_stmt().fullselect_stmt_item(0).subselect_stmt();
+    List<HplsqlParser.Select_list_itemContext> selectListItemContexts = subselectStmtContext.select_list().select_list_item();
+    String tableName = evalPop(
+        subselectStmtContext.from_clause().from_table_clause().from_table_name_clause().table_name()).toString();
+
+    sql.append(tableName).append(" WHERE ");
+
+    sql.append(evalPop(ctx.expr(0)).toString())
+        .append("=")
+        .append(tableName).append(".")
+        .append(evalPop(selectListItemContexts.get(0).expr()).toString());
+    for (int i = 1; i < ctx.expr().size(); i++) {
+      sql.append(" AND ")
+          .append(evalPop(ctx.expr(i)).toString())
+          .append("=")
+          .append(tableName).append(".")
+          .append(evalPop(selectListItemContexts.get(i).expr()).toString());
+    }
+    sql.append(")");
+  }
+
+    private boolean isSimpleMultiInClause(HplsqlParser.Bool_expr_multi_inContext ctx) {
+    for (HplsqlParser.ExprContext expr : ctx.expr()) {
+      if (expr.expr_atom() == null) {
+        return false;
+      }
+    }
+
+    HplsqlParser.Subselect_stmtContext subselectStmtContext =
+        ctx.select_stmt().fullselect_stmt().fullselect_stmt_item(0).subselect_stmt();
+    if (subselectStmtContext == null) {
+      return false;
+    }
+
+    for (HplsqlParser.Select_list_itemContext selectListItem : subselectStmtContext.select_list().select_list_item()) {
+      if (selectListItem.select_list_asterisk() != null || selectListItem.expr().expr_atom() == null) {
+        return false;
+      }
+    }
+
+    if (subselectStmtContext.from_clause() == null || subselectStmtContext.where_clause() != null) {
+      return false;
+    }
+
+    if (subselectStmtContext.from_clause().from_table_clause().from_table_name_clause() == null) {
+      return false;
+    }
+    return true;
   }
   
   /**
