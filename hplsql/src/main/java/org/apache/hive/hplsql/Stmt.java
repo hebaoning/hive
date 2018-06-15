@@ -1295,9 +1295,10 @@ public class Stmt {
     if (ctx.update_alias() != null) {
       String tableName = evalPop(ctx.update_table().table_name()).toString();
       // FIXME: Hive do not support schema.table.column
-      if (!tableName.contains(".")) {
-        sql = sql.replace(alias + ".", tableName + ".");
+      if (tableName.contains(".")) {
+        tableName = tableName.split("\\.")[1];
       }
+      sql = sql.replace(alias + ".", tableName + ".");
     }
     exec.buildSql = oldBuildSql;
 
