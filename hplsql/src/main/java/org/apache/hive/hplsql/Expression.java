@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RuleContext;
 import org.apache.hive.hplsql.Var.Type;
 
 /**
@@ -321,18 +322,25 @@ public class Expression {
     }
     HplsqlParser.Subselect_stmtContext subselectStmtContext =
         ctx.select_stmt().fullselect_stmt().fullselect_stmt_item(0).subselect_stmt();
-    List<HplsqlParser.Select_list_itemContext> selectListItemContexts = subselectStmtContext.select_list().select_list_item();
+    List<HplsqlParser.Select_list_itemContext> selectListItemContexts =
+        subselectStmtContext.select_list().select_list_item();
+    HplsqlParser.Update_stmtContext updateStmtContext = findParent(ctx, HplsqlParser.Update_stmtContext.class);
+
     String tableName = evalPop(
         subselectStmtContext.from_clause().from_table_clause().from_table_name_clause().table_name()).toString();
+    String targetTableName = evalPop(updateStmtContext.update_table().table_name()).toString();
 
     sql.append(tableName).append(" WHERE ");
 
-    sql.append(evalPop(ctx.expr(0)).toString())
+    sql.append(targetTableName).append(".")
+        .append(evalPop(ctx.expr(0)).toString())
         .append("=")
         .append(tableName).append(".")
         .append(evalPop(selectListItemContexts.get(0).expr()).toString());
     for (int i = 1; i < ctx.expr().size(); i++) {
       sql.append(" AND ")
+          .append(targetTableName)
+          .append(".")
           .append(evalPop(ctx.expr(i)).toString())
           .append("=")
           .append(tableName).append(".")
@@ -341,7 +349,7 @@ public class Expression {
     sql.append(")");
   }
 
-    private boolean isSimpleMultiInClause(HplsqlParser.Bool_expr_multi_inContext ctx) {
+  private static boolean isSimpleMultiInClause(HplsqlParser.Bool_expr_multi_inContext ctx) {
     for (HplsqlParser.ExprContext expr : ctx.expr()) {
       if (expr.expr_atom() == null) {
         return false;
@@ -363,11 +371,26 @@ public class Expression {
     if (subselectStmtContext.from_clause() == null || subselectStmtContext.where_clause() != null) {
       return false;
     }
-
     if (subselectStmtContext.from_clause().from_table_clause().from_table_name_clause() == null) {
       return false;
     }
+
+    HplsqlParser.Update_stmtContext updateStmtContext = findParent(ctx, HplsqlParser.Update_stmtContext.class);
+    if (updateStmtContext == null || updateStmtContext.update_table().table_name() == null) {
+      return false;
+    }
     return true;
+  }
+
+  private static <T extends RuleContext> T findParent(RuleContext child, Class<T> parent) {
+    RuleContext next = child.parent;
+    while (!(next instanceof HplsqlParser.BlockContext)) {
+      if (parent.isInstance(next)) {
+        return (T)next;
+      }
+      next = next.parent;
+    }
+    return null;
   }
   
   /**
