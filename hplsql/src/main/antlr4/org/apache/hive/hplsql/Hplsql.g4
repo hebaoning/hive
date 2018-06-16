@@ -1003,9 +1003,9 @@ describe_stmt :
      ;
      
 bool_expr :                               // Boolean condition
-       T_NOT? T_OPEN_P bool_expr T_CLOSE_P 
-     | bool_expr bool_expr_logical_operator bool_expr 
-     | bool_expr_atom
+       bool_expr_atom
+     | bool_expr bool_expr_logical_operator bool_expr
+     | T_NOT? T_OPEN_P bool_expr T_CLOSE_P
      ;
 
 bool_expr_atom :
@@ -1023,7 +1023,7 @@ bool_expr_unary :
     ;
     
 bool_expr_single_in :
-      expr T_NOT? T_IN T_OPEN_P ((expr (T_COMMA expr)*) | select_stmt) T_CLOSE_P 
+      expr T_NOT? T_IN T_OPEN_P ((expr (T_COMMA expr)*) | select_stmt) T_CLOSE_P
     ;
 
 bool_expr_multi_in :
