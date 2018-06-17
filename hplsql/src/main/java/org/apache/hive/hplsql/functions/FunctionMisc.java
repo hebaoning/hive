@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hive.hplsql.*;
 
 public class FunctionMisc extends Function {
@@ -54,6 +55,7 @@ public class FunctionMisc extends Function {
     f.map.put("INTEGER", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
     f.map.put("INT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
     f.map.put("_ABS", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { abs(ctx); }});
+    f.map.put("_IS_NUMERIC", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { isNumeric(ctx); }});
     f.map.put("_ADMIN_CMD", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { adminCmd(ctx); }});
 
     f.specMap.put("ACTIVITY_COUNT", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { activityCount(ctx); }});
@@ -381,4 +383,15 @@ public class FunctionMisc extends Function {
       evalNull();
     }
   }
+
+  void isNumeric(HplsqlParser.Expr_func_paramsContext ctx) {
+    if (ctx == null || ctx.func_param().size() != 1) {
+      evalNull();
+      return;
+    }
+
+    String str = evalPop(ctx.func_param(0).expr()).toString();
+    exec.stackPush(StringUtils.isNumeric(str));
+  }
+
 }
