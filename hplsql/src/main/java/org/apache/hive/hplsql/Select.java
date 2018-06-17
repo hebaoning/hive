@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -429,6 +430,9 @@ public class Select {
     sql.append(")");
     if (ctx.from_alias_clause() != null) {
       sql.append(" ").append(exec.getText(ctx.from_alias_clause()));
+    } else {
+      //FIXME: check connection type is HIVE
+      sql.append(" tn").append(UUID.randomUUID().toString().replace("-",""));
     }
     exec.stackPush(sql);
     return 0; 
