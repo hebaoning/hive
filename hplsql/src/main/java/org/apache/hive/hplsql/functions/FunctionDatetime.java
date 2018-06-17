@@ -164,16 +164,17 @@ public class FunctionDatetime extends Function {
     if (ctx.func_param().size() != 2) {
       evalNull();
       return;
-    }    
-    String value = evalPop(ctx.func_param(0).expr()).toString();
-    String sqlFormat = evalPop(ctx.func_param(1).expr()).toString();
-    String format = Utils.convertSqlDatetimeFormat(sqlFormat);
+    }
     try {
+      String value = evalPop(ctx.func_param(0).expr()).toString();
+      String sqlFormat = evalPop(ctx.func_param(1).expr()).toString();
+      String format = Utils.convertSqlDatetimeFormat(sqlFormat);
       long timeInMs = new SimpleDateFormat(format).parse(value).getTime();
       evalVar(new Var(Var.Type.TIMESTAMP, new Timestamp(timeInMs)));
     }
     catch (Exception e) {
-      exec.signal(e);
+      // exec.signal(e);
+      trace(ctx, "Exception: " + e.getMessage());
       evalNull();
     }
   }
