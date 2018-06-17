@@ -24,6 +24,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RuleContext;
@@ -192,8 +193,12 @@ public class Expression {
     else if (op.T_GREATER() != null || op.T_LESS() != null || op.T_GREATEREQUAL() != null || op.T_LESSEQUAL() != null) {
       operatorCompare(ctx, op);
     }
+    else if (op.T_LIKE() != null) {
+      operatorLike(ctx, op);
+    }
     else {
-      exec.stackPush(false);
+      // exec.stackPush(false);
+      throw new UnsupportedOperationException(op.getText());
     }
     return 0; 
   }
@@ -615,6 +620,20 @@ public class Expression {
       if (cmp <= 0) {
         bool = true;
       }
+    }
+    exec.stackPush(bool);
+  }
+
+  /**
+   * Like operator
+   */
+  public void operatorLike(HplsqlParser.Bool_expr_binaryContext ctx, HplsqlParser.Bool_expr_binary_operatorContext op) {
+    String srcStr = evalPop(ctx.expr(0)).toString();
+    String patternStr = evalPop(ctx.expr(1)).toString();
+    patternStr = patternStr.replace("%", ".*").replace("_", ".");
+    boolean bool = Pattern.matches(patternStr, srcStr);
+    if (op.T_NOT() != null) {
+      bool = !bool;
     }
     exec.stackPush(bool);
   }
