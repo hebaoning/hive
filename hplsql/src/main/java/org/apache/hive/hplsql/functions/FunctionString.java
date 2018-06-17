@@ -287,20 +287,24 @@ public class FunctionString extends Function {
    * TO_CHAR function
    */
   void toChar(HplsqlParser.Expr_func_paramsContext ctx) {
-    int cnt = getParamCount(ctx);
-    if (cnt == 1) {
-      String str = evalPop(ctx.func_param(0).expr()).toString();
-      evalString(str);
-      return;
-    }
+    try {
+      int cnt = getParamCount(ctx);
+      if (cnt == 1) {
+        String str = evalPop(ctx.func_param(0).expr()).toString();
+        evalString(str);
+        return;
+      }
 
-    if (cnt == 2) {
-      Var vt = new Var(Var.Type.TIMESTAMP);
-      vt.cast(evalPop(ctx.func_param(0).expr()));
-      String sqlFormat = evalPop(ctx.func_param(1).expr()).toString();
-      String format = Utils.convertSqlDatetimeFormat(sqlFormat);
-      evalString(new SimpleDateFormat(format).format(vt.timestampValue()));
-      return;
+      if (cnt == 2) {
+        Var vt = new Var(Var.Type.TIMESTAMP);
+        vt.cast(evalPop(ctx.func_param(0).expr()));
+        String sqlFormat = evalPop(ctx.func_param(1).expr()).toString();
+        String format = Utils.convertSqlDatetimeFormat(sqlFormat);
+        evalString(new SimpleDateFormat(format).format(vt.timestampValue()));
+        return;
+      }
+    } catch (Exception e) {
+      trace(ctx, "Exception: " + e.getMessage());
     }
 
     evalNull();
