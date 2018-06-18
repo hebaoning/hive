@@ -238,6 +238,9 @@ public class Expression {
         }
       }
     }
+    else {
+      throw new UnsupportedOperationException(ctx.getText());
+    }
     exec.stackPush(val);
     return 0; 
   }
