@@ -311,14 +311,10 @@ public class Stmt {
       appendTableOptions(sql, identCtx.getText(), name, defCtx);
     } 
     else if (conf.tempTables == Conf.TempTables.MANAGED) {
-      managedName = name + "_" + UUID.randomUUID().toString().replace("-","");
-      if (name.contains(".")) {
-        name = name.split("\\.")[1];
-      } else {
-        if (!conf.tempTablesSchema.isEmpty()) {
-          managedName = conf.tempTablesSchema + "." + managedName;
-        }
+      if (!conf.tempTablesSchema.isEmpty()) {
+        name = name.replace(conf.tempTablesSchema.toUpperCase() + ".", "");
       }
+      managedName = name + "_" + UUID.randomUUID().toString().replace("-","");
       if (trace) {
         trace(null, "Managed table name: " + managedName);
       }
