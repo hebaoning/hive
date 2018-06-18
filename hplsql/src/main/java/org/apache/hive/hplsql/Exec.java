@@ -2063,7 +2063,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
    */
   @Override 
   public Integer visitUpdate_stmt(HplsqlParser.Update_stmtContext ctx) { 
-    return stmt.update(ctx); 
+    return stmt.update(ctx);
   }
 
   /**
@@ -2307,7 +2307,11 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
         exec.stackPush(var);
       }
       else {
-        exec.stackPush(new Var(ident, Var.Type.STRING, var.toSqlString()));
+        String value = var.toSqlString();
+        if (var.type == Type.DATE) {
+          value = "DATE(" + value + ")";
+        }
+        exec.stackPush(new Var(ident, Var.Type.STRING, value));
       }
     }
     else {
