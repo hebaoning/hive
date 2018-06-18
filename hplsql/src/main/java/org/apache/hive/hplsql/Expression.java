@@ -343,7 +343,6 @@ public class Expression {
     sql.append(targetTableName).append(".")
         .append(evalPop(ctx.expr(0)).toString())
         .append("=")
-        .append(tableName).append(".")
         .append(evalPop(selectListItemContexts.get(0).expr()).toString());
     for (int i = 1; i < ctx.expr().size(); i++) {
       sql.append(" AND ")
@@ -351,7 +350,6 @@ public class Expression {
           .append(".")
           .append(evalPop(ctx.expr(i)).toString())
           .append("=")
-          .append(tableName).append(".")
           .append(evalPop(selectListItemContexts.get(i).expr()).toString());
     }
     sql.append(")");
