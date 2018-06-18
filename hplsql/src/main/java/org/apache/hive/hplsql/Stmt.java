@@ -308,7 +308,7 @@ public class Stmt {
     if (conf.tempTables == Conf.TempTables.NATIVE) {
       sql.append("CREATE TEMPORARY TABLE " + name);
       sql.append(createTableDefinition(defCtx, last));
-      appendTableOptions(sql, identCtx.getText(), name, defCtx);
+      appendTableOptions(sql, name, defCtx);
     } 
     else if (conf.tempTables == Conf.TempTables.MANAGED) {
       if (!conf.tempTablesSchema.isEmpty()) {
@@ -321,11 +321,11 @@ public class Stmt {
 
       sql.append("CREATE TABLE " + managedName);
       if (defCtx.T_AS() != null) {
-        appendTableOptions(sql, identCtx.getText(), managedName, defCtx);
+        appendTableOptions(sql, managedName, defCtx);
         sql.append(createTableDefinition(defCtx, last));
       } else {
         sql.append(createTableDefinition(defCtx, last));
-        appendTableOptions(sql, identCtx.getText(), managedName, defCtx);
+        appendTableOptions(sql, managedName, defCtx);
       }
     }
 
@@ -348,7 +348,7 @@ public class Stmt {
   }
 
   private void appendTableOptions(
-      StringBuilder sql, String tableName, String location, HplsqlParser.Create_table_definitionContext defCtx) {
+      StringBuilder sql, String tableName, HplsqlParser.Create_table_definitionContext defCtx) {
     // FIXME: Workaround to create ACID temporary table
     String[] tableNamePart = tableName.split("__");
     boolean enableAcid = tableNamePart.length >= 3 && tableNamePart[0].equalsIgnoreCase("acid");
@@ -358,7 +358,7 @@ public class Stmt {
           .append("\nSTORED AS ORC");
     }
     if (!conf.tempTablesLocation.isEmpty()) {
-      sql.append("\nLOCATION '").append(conf.tempTablesLocation).append("/").append(location).append("'");
+      sql.append("\nLOCATION '").append(conf.tempTablesLocation).append("/").append(tableName).append("'");
     }
     if (enableAcid) {
       sql.append("\nTBLPROPERTIES ('transactional'='true')");
