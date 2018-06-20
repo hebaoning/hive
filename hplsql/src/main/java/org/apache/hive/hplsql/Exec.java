@@ -2554,6 +2554,12 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     return 0;
   }
 
+  @Override
+  public Integer visitSet_current_path_option(HplsqlParser.Set_current_path_optionContext ctx) {
+    // avoid visitIdent to pollute other statements
+    return 0;
+  }
+
   /**
    * Get the package context within which the current routine is executed
    */
