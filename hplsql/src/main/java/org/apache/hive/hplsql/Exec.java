@@ -1917,14 +1917,17 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   public Integer visitCall_stmt(HplsqlParser.Call_stmtContext ctx) {
     String name = ctx.ident().getText();
 
-    Var v = findVariable(name);
-    if (v != null) {
-      try {
-        new Exec(this).include(v.toString());
-      } catch (Exception e) {
-        error(ctx, "run " + v.toString() + " error: " + e.getMessage());
+    // FIXME: avoid conflict with proc name
+    if (name.startsWith("sp__")) {
+      Var v = findVariable(name);
+      if (v != null) {
+        try {
+          new Exec(this).include(v.toString());
+        } catch (Exception e) {
+          error(ctx, "run " + v.toString() + " error: " + e.getMessage());
+        }
+        return 0;
       }
-      return 0;
     }
 
     Package packCallContext = exec.getPackageCallContext();
