@@ -1916,6 +1916,17 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   @Override 
   public Integer visitCall_stmt(HplsqlParser.Call_stmtContext ctx) {
     String name = ctx.ident().getText();
+
+    Var v = findVariable(name);
+    if (v != null) {
+      try {
+        new Exec(this).include(v.toString());
+      } catch (Exception e) {
+        error(ctx, "run " + v.toString() + " error: " + e.getMessage());
+      }
+      return 0;
+    }
+
     Package packCallContext = exec.getPackageCallContext();
     ArrayList<String> qualified = exec.meta.splitIdentifier(name);
     exec.inCallStmt = true;    
