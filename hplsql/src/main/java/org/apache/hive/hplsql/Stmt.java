@@ -787,14 +787,14 @@ public class Stmt {
   public void sqlParsingStructure(HplsqlParser.Insert_stmtContext ctx) {
       StringBuilder builder = new StringBuilder();
 
-      //cte_select_stmtContext
+      // cte_select_stmtContext
       buildAppendText(ctx.select_stmt().cte_select_stmt(), builder);
       builder.append("insert into ").append(ctx.table_name().ident().getText());
 
-      //insert_stmt_colsContext
+      // insert_stmt_colsContext
       buildAppendText(ctx.insert_stmt_cols(), builder);
 
-      //full_select_stmt
+      // full_select_stmt
       buildAppendText(ctx.select_stmt().fullselect_stmt(), builder);
       System.out.println(builder.toString());
   }
