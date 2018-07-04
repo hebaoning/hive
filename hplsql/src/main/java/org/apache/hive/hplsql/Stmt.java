@@ -772,13 +772,40 @@ public class Stmt {
    * SQL INSERT statement
    */
   public Integer insert(HplsqlParser.Insert_stmtContext ctx) {
+    sqlParsingStructure(ctx);
     exec.stmtConnList.clear();
     if (ctx.select_stmt() != null) {
       return insertSelect(ctx);
     }
-    return insertValues(ctx); 
+    return insertValues(ctx);
   }
-  
+
+
+  /**
+   * Construction with structure
+   */
+  public void sqlParsingStructure(HplsqlParser.Insert_stmtContext ctx) {
+      StringBuilder builder = new StringBuilder();
+      //cte_select_stmtContext
+      buildAppendText(ctx.select_stmt().cte_select_stmt(), builder);
+      builder.append("insert into ").append(ctx.table_name().ident().getText());
+      //insert_stmt_colsContext
+      buildAppendText(ctx.insert_stmt_cols(), builder);
+      //full_select_stmt
+      buildAppendText(ctx.select_stmt().fullselect_stmt(), builder);
+      System.out.println(builder.toString());
+  }
+
+  /**
+   * Splicing with structure
+   */
+  private void buildAppendText(ParserRuleContext ctx, StringBuilder builder) {
+    if (null != ctx) {
+      builder.append(exec.getFormattedText(ctx));
+      builder.append("\r\n");
+    }
+  }
+
   /**
    * SQL INSERT SELECT statement
    */

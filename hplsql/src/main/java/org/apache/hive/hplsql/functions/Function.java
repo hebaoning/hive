@@ -413,34 +413,34 @@ public class Function {
     userMap.put(name.toUpperCase(), ctx);
   }
 
-    /**
-     * Add a user-defined procedure
-     */
-    public void addUserProcedure(HplsqlParser.Create_procedure_stmtContext ctx) {
-        String name = ctx.ident(0).getText();
-        if (trace) {
-            trace(ctx, "CREATE PROCEDURE " + name);
-        }
-        printParameters(ctx, name);
-        procMap.put(name.toUpperCase(), ctx);
-    }
+  /**
+   * Add a user-defined procedure
+   */
+  public void addUserProcedure(HplsqlParser.Create_procedure_stmtContext ctx) {
+      String name = ctx.ident(0).getText();
+      if (trace) {
+          trace(ctx, "CREATE PROCEDURE " + name);
+      }
+      printParameters(ctx, name);
+      procMap.put(name.toUpperCase(), ctx);
+  }
 
-    /**
-     * print procedure name and procedure parameter
-     */
-    private void printParameters(HplsqlParser.Create_procedure_stmtContext ctx, String name) {
-        System.out.println();
-        System.out.println(name);
-        HplsqlParser.Create_routine_paramsContext param = ctx.create_routine_params();
-        for (HplsqlParser.Create_routine_param_itemContext par : param.create_routine_param_item()) {
-            if (null != par.T_IN() && par.T_IN().getText().equals("IN")) {
-                System.out.println(par.ident().getText() + ":" + par.T_IN().getText() + ":" + par.dtype().getText());
-            }
-            if (null != par.T_OUT() && par.T_OUT().getText().equals("OUT")) {
-                System.out.println(par.ident().getText() + ":" + par.T_OUT().getText() + ":" + par.dtype().getText());
-            }
-        }
-    }
+  /**
+   * Print procedure name and procedure parameter
+   */
+  private void printParameters(HplsqlParser.Create_procedure_stmtContext ctx, String name) {
+      System.out.println();
+      System.out.println(name);
+      HplsqlParser.Create_routine_paramsContext param = ctx.create_routine_params();
+      for (HplsqlParser.Create_routine_param_itemContext par : param.create_routine_param_item()) {
+          if (null != par.T_IN() && par.T_IN().getText().equals("IN")) {
+              System.out.println(par.ident().getText() + ":" + par.T_IN().getText() + ":" + par.dtype().getText());
+          }
+          if (null != par.T_OUT() && par.T_OUT().getText().equals("OUT")) {
+              System.out.println(par.ident().getText() + ":" + par.T_OUT().getText() + ":" + par.dtype().getText());
+          }
+      }
+  }
 
     /**
      * print procedure parameter
