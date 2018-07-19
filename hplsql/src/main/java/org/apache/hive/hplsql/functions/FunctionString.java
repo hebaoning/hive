@@ -18,6 +18,7 @@
 
 package org.apache.hive.hplsql.functions;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hive.hplsql.*;
 
 import java.text.SimpleDateFormat;
@@ -41,11 +42,14 @@ public class FunctionString extends Function {
     f.map.put("REPLACE", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { replace(ctx); }}); 
     f.map.put("SUBSTR", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { substr(ctx); }});    
     f.map.put("SUBSTRING", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { substr(ctx); }});
-    f.map.put("_TO_CHAR", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { toChar(ctx); }});
+    f.map.put("TO_CHAR", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { toChar(ctx); }});
+    f.map.put("TS_FMT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { toChar(ctx); }});
     f.map.put("UPPER", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { upper(ctx); }});
     f.map.put("RIGHT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { right(ctx); }});
     f.map.put("LEFT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { left(ctx); }});
     f.map.put("TRIM", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { trim(ctx); }});
+    f.map.put("LTRIM", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { ltrim(ctx); }});
+    f.map.put("RTRIM", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { rtrim(ctx); }});
     f.map.put("SUBSTRING", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { substring(ctx); }});
 
     f.specMap.put("SUBSTRING", new FuncSpecCommand() { public void run(HplsqlParser.Expr_spec_funcContext ctx) { substring(ctx); }});
@@ -281,6 +285,26 @@ public class FunctionString extends Function {
     }
     String str = evalPop(ctx.func_param(0)).toString();
     evalString(str.trim());
+  }
+
+  void ltrim(HplsqlParser.Expr_func_paramsContext ctx) {
+    int cnt = ctx.func_param().size();
+    if (cnt != 1) {
+      evalNull();
+      return;
+    }
+    String str = evalPop(ctx.func_param(0)).toString();
+    evalString(StringUtils.stripStart(str, null));
+  }
+
+  void rtrim(HplsqlParser.Expr_func_paramsContext ctx) {
+    int cnt = ctx.func_param().size();
+    if (cnt != 1) {
+      evalNull();
+      return;
+    }
+    String str = evalPop(ctx.func_param(0)).toString();
+    evalString(StringUtils.stripEnd(str, null));
   }
   
   /**

@@ -454,8 +454,14 @@ public class Var {
     else if (type == Type.BIGINT && v.type == Type.BIGINT) {
       return ((Long)value).compareTo((Long)v.value);
     }
+    else if (type == Type.DOUBLE && v.type == Type.DOUBLE) {
+      return ((Double)value).compareTo((Double) v.value);
+    }
     else if (type == Type.STRING && v.type == Type.STRING) {
       return ((String)value).compareTo((String)v.value);
+    }
+    else if (type == Type.DECIMAL && v.type == Type.DECIMAL) {
+      return ((BigDecimal)value).compareTo((BigDecimal)v.value);
     }
     return -1;
   }

@@ -54,6 +54,8 @@ public class FunctionMisc extends Function {
     f.map.put("PART_COUNT_BY", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { partCountBy(ctx); }});
     f.map.put("INTEGER", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
     f.map.put("INT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
+    f.map.put("MIN", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { min(ctx); }});
+    f.map.put("MAX", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { max(ctx); }});
     f.map.put("_ABS", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { abs(ctx); }});
     f.map.put("_IS_NUMERIC", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { isNumeric(ctx); }});
     f.map.put("_ADMIN_CMD", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { adminCmd(ctx); }});
@@ -392,6 +394,46 @@ public class FunctionMisc extends Function {
 
     String str = evalPop(ctx.func_param(0).expr()).toString();
     exec.stackPush(StringUtils.isNumeric(str));
+  }
+
+  void max(HplsqlParser.Expr_func_paramsContext ctx) {
+    if (ctx == null || ctx.func_param().size() != 2) {
+      evalNull();
+      return;
+    }
+
+    Var v1 = evalPop(ctx.func_param(0).expr());
+    Var v2 = evalPop(ctx.func_param(1).expr());
+    if (v1.type != v2.type ) {
+      evalNull();
+      return;
+    }
+
+    if (v1.compareTo(v2) > 0) {
+      evalVar(v1);
+    } else {
+      evalVar(v2);
+    }
+  }
+
+  void min(HplsqlParser.Expr_func_paramsContext ctx) {
+    if (ctx == null || ctx.func_param().size() != 2) {
+      evalNull();
+      return;
+    }
+
+    Var v1 = evalPop(ctx.func_param(0).expr());
+    Var v2 = evalPop(ctx.func_param(1).expr());
+    if (v1.type != v2.type ) {
+      evalNull();
+      return;
+    }
+
+    if (v1.compareTo(v2) < 0) {
+      evalVar(v1);
+    } else {
+      evalVar(v2);
+    }
   }
 
 }
