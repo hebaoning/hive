@@ -624,6 +624,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
    * Register JARs, FILEs and CREATE TEMPORARY FUNCTION for UDF call
    */
   public void registerUdf() {
+    udfRegistered = true;
     if (udfRegistered) {
       return;
     }
