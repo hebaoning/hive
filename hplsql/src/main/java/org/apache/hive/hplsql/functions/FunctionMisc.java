@@ -56,7 +56,7 @@ public class FunctionMisc extends Function {
     f.map.put("INT", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { integer(ctx); }});
     f.map.put("MIN", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { min(ctx); }});
     f.map.put("MAX", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { max(ctx); }});
-    f.map.put("_ABS", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { abs(ctx); }});
+    f.map.put("ABS", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { abs(ctx); }});
     f.map.put("_IS_NUMERIC", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { isNumeric(ctx); }});
     f.map.put("_ADMIN_CMD", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { adminCmd(ctx); }});
 
