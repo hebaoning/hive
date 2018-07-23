@@ -51,7 +51,7 @@ public class FunctionDatetime extends Function {
     f.map.put("UNIX_TIMESTAMP", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { unixTimestamp(ctx); }});
     f.map.put("TRUNC", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { trunc(ctx); }});
     f.map.put("DAYOFWEEK", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { dayOfWeek(ctx); }});
-    f.map.put("_DAYOFYEAR", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { dayOfYear(ctx); }});
+    f.map.put("DAYOFYEAR", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { dayOfYear(ctx); }});
     f.map.put("YEAR", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { year(ctx); }});
     f.map.put("MONTH", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { month(ctx); }});
     f.map.put("DAY", new FuncCommand() { public void run(HplsqlParser.Expr_func_paramsContext ctx) { day(ctx); }});
