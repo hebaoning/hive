@@ -21,6 +21,7 @@ package org.apache.hive.hplsql;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Date;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
@@ -237,6 +238,27 @@ public class Expression {
           val = true;
         }
       }
+    }
+    else if (ctx.T_EXISTS() != null) {
+      String sql = evalPop(ctx.select_stmt()).toString();
+      Query query = new Query(sql);
+      exec.executeQuery(ctx, query, exec.conf.defaultConnection);
+      if (!query.error()) {
+        try {
+          ResultSet rs = query.getResultSet();
+          if (rs != null && rs.next()) {
+            val = true;
+          }
+          if (ctx.T_NOT() != null) {
+            val = !val;
+          }
+        } catch (Exception e) {
+          exec.signal(e);
+        }
+      } else {
+        exec.signal(query.getException());
+      }
+      exec.closeQuery(query, exec.conf.defaultConnection);
     }
     else {
       throw new UnsupportedOperationException(ctx.getText());
