@@ -511,7 +511,8 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   boolean runExitHandler() {
     exec.currentSignal = exec.signals.pop();
     for (Handler h : currentScope.handlers) {
-      if (h.execType != Handler.ExecType.EXIT) {
+      if (h.execType != Handler.ExecType.EXIT
+          || h.type == Signal.Type.SQLEXCEPTION || h.type == Signal.Type.SQLWARNING) {
         continue;
       }
       if ((h.type != Signal.Type.USERDEFINED && h.type == exec.currentSignal.type) ||
