@@ -13,6 +13,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspe
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.TimestampObjectInspector;
 import org.apache.hadoop.io.Text;
 import org.apache.hive.hplsql.Utils;
+import org.joda.time.LocalDateTime;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -41,9 +42,16 @@ public class ToChar extends GenericUDF {
       return new Text(
           ((PrimitiveObjectInspector)argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get()).toString());
     }
-    if (argumentsOI[0] instanceof DateObjectInspector || argumentsOI[0] instanceof TimestampObjectInspector) {
+    if (argumentsOI[0] instanceof DateObjectInspector
+        || argumentsOI[0] instanceof TimestampObjectInspector
+        || argumentsOI[0] instanceof StringObjectInspector) {
       String sqlFormat = ((StringObjectInspector)argumentsOI[1]).getPrimitiveJavaObject(arguments[1].get());
       String format = Utils.convertSqlDatetimeFormat(sqlFormat);
+      if (argumentsOI[0] instanceof StringObjectInspector) {
+        String str = ((StringObjectInspector) argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
+        Date t = new Date(LocalDateTime.parse(str).toDateTime().getMillis());
+        return new Text(new SimpleDateFormat(format).format(t));
+      }
       if (argumentsOI[0] instanceof DateObjectInspector) {
         Date t = ((DateObjectInspector) argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
         return new Text(new SimpleDateFormat(format).format(t));
