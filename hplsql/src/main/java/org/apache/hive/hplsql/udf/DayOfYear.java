@@ -8,7 +8,9 @@ import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.DateObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
 import org.apache.hadoop.io.IntWritable;
+import org.joda.time.LocalDateTime;
 
 import java.sql.Date;
 import java.util.Calendar;
@@ -29,7 +31,13 @@ public class DayOfYear extends GenericUDF {
 
   @Override
   public Object evaluate(DeferredObject[] arguments) throws HiveException {
-    Date dt = ((DateObjectInspector) argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
+    Date dt;
+    if (argumentsOI[0] instanceof StringObjectInspector) {
+      String str = ((StringObjectInspector) argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
+      dt = new Date(LocalDateTime.parse(str).toDateTime().getMillis());
+    } else {
+      dt = ((DateObjectInspector) argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
+    }
     Calendar c = Calendar.getInstance();
     c.setTime(dt);
     return new IntWritable(c.get(Calendar.DAY_OF_YEAR));
