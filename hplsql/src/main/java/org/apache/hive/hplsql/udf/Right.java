@@ -25,6 +25,7 @@ public class Right extends GenericUDF {
     if (!(arguments[0] instanceof StringObjectInspector)) {
       throw new UDFArgumentException("First argument must be a string");
     }
+    argumentsOI = arguments;
     return PrimitiveObjectInspectorFactory.writableStringObjectInspector;
   }
 
