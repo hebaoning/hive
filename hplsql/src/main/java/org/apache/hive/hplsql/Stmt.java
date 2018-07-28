@@ -354,7 +354,7 @@ public class Stmt {
     boolean enableAcid = tableNamePart.length >= 3 && tableNamePart[0].equalsIgnoreCase("acid");
     // keep this order
     if (enableAcid && defCtx.T_LIKE() == null) {
-      sql.append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 1 BUCKETS")
+      sql.append("\nCLUSTERED BY (").append(tableNamePart[1]).append(") INTO 8 BUCKETS")
           .append("\nSTORED AS ORC");
     }
     if (!conf.tempTablesLocation.isEmpty()) {
