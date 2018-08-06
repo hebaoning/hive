@@ -430,7 +430,7 @@ public class Utils {
         idents.remove(identIdx);
       }
       else {
-        allValue.add("'NULL'");
+        allValue.add("null");
       }
     }
     return allValue;
