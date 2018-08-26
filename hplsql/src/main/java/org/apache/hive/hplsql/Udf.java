@@ -18,6 +18,7 @@
 
 package org.apache.hive.hplsql;
 
+import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentLengthException;
@@ -25,10 +26,18 @@ import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
 import org.apache.hadoop.hive.ql.udf.UDFType;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.BooleanObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.DateObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.HiveDecimalObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.IntObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.LongObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.TimestampObjectInspector;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
 
 @Description(name = "hplsql", value = "_FUNC_('query' [, :1, :2, ...n]) - Execute HPL/SQL query", extended = "Example:\n" + " > SELECT _FUNC_('CURRENT_DATE') FROM src LIMIT 1;\n")
 @UDFType(deterministic = false)
@@ -112,8 +121,33 @@ public class Udf extends GenericUDF {
           exec.setVariable(name, new Var(value));
         }        
       }
+      else if (argumentsOI[i] instanceof BooleanObjectInspector) {
+        Boolean value = (Boolean)((BooleanObjectInspector)argumentsOI[i]).getPrimitiveJavaObject(arguments[i].get());
+        if (value != null) {
+          exec.setVariable(name, new Var(value));
+        }
+      }
+      else if (argumentsOI[i] instanceof HiveDecimalObjectInspector) {
+        HiveDecimal value = ((HiveDecimalObjectInspector)argumentsOI[i]).getPrimitiveJavaObject(arguments[i].get());
+        if (value != null) {
+          exec.setVariable(name, new Var(value.bigDecimalValue()));
+        }
+      }
+      else if (argumentsOI[i] instanceof DateObjectInspector) {
+        Date value = ((DateObjectInspector)argumentsOI[i]).getPrimitiveJavaObject(arguments[i].get());
+        if (value != null) {
+          exec.setVariable(name, new Var(value));
+        }
+      }
+      else if (argumentsOI[i] instanceof TimestampObjectInspector) {
+        Timestamp value = ((TimestampObjectInspector)argumentsOI[i]).getPrimitiveJavaObject(arguments[i].get());
+        if (value != null) {
+          exec.setVariable(name, new Var(value, 3));
+        }
+      }
       else {
-        exec.setVariableToNull(name);
+        // exec.setVariableToNull(name);
+        throw new HiveException("invalid type " + argumentsOI[i].getTypeName());
       }
     }
   }
