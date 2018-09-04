@@ -32,7 +32,7 @@ public class Right extends GenericUDF {
   @Override
   public Object evaluate(DeferredObject[] arguments) throws HiveException {
     String str = ((StringObjectInspector)argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
-    Integer len = (Integer)((IntObjectInspector)argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
+    Integer len = (Integer)((IntObjectInspector)argumentsOI[0]).getPrimitiveJavaObject(arguments[1].get());
     return new Text(StringUtils.right(str, len));
   }
 
