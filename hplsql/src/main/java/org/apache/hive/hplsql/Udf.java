@@ -37,12 +37,18 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.TimestampObjectIn
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 @Description(name = "hplsql", value = "_FUNC_('query' [, :1, :2, ...n]) - Execute HPL/SQL query", extended = "Example:\n" + " > SELECT _FUNC_('CURRENT_DATE') FROM src LIMIT 1;\n")
 @UDFType(deterministic = false)
 public class Udf extends GenericUDF {
-  
+
+  static Map<String, Map<String, String>> tableCache = new HashMap<>(2000);
+
   Exec exec;
   StringObjectInspector queryOI;
   ObjectInspector[] argumentsOI;
@@ -74,6 +80,16 @@ public class Udf extends GenericUDF {
     if (arguments.length > 1) {
       setParameters(arguments);
     }
+
+    String query = queryOI.getPrimitiveJavaObject(arguments[0].get());
+    if (query.toLowerCase().startsWith("fn_get_sta_code(")) {
+      if (!tableCache.containsKey("fn_get_sta_code")) {
+        cacheTable("fn_get_sta_code");
+      }
+      return tableCache.get("fn_get_sta_code").get(
+            exec.findVariable(":1").toString() + "||" + exec.findVariable(":2").toString());
+    }
+
     Var result = exec.run();
     if (result != null) {
       return result.toString();
@@ -151,7 +167,23 @@ public class Udf extends GenericUDF {
       }
     }
   }
-  
+
+  void cacheTable(String funcName) {
+    funcName = funcName.toLowerCase();
+    tableCache.put(funcName, new HashMap<>());
+
+    String conn = exec.getStatementConnection();
+    Query query = exec.executeQuery(null, "select sour_id, sour_code, code from sta_code_map", conn);
+    try {
+      ResultSet rs = query.getResultSet();
+      while (rs.next()) {
+        tableCache.get(funcName).put(rs.getString(1) + "||" + rs.getString(2), rs.getString(3));
+      }
+    } catch (SQLException e) {
+      exec.closeQuery(query, conn);
+    }
+  }
+
   @Override
   public String getDisplayString(String[] children) {
     return "hplsql";
