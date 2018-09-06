@@ -89,7 +89,7 @@ public class Meta {
     return row;
   }
 
-  List<String> getColumnNames(ParserRuleContext ctx, String conn, String table) {
+  public List<String> getColumnNames(ParserRuleContext ctx, String conn, String table) {
     Row row = getRowDataType(ctx, conn, table);
     if (row == null) {
       return null;
@@ -97,12 +97,20 @@ public class Meta {
     return row.getColumns().stream().map(Column::getName).collect(Collectors.toList());
   }
 
-  List<String> getPartitionKeys(ParserRuleContext ctx, String conn, String table) {
+  public List<String> getPartitionKeys(ParserRuleContext ctx, String conn, String table) {
     Row row = getRowDataType(ctx, conn, table);
     if (row == null) {
       return null;
     }
     return row.getColumns().stream().filter(Column::isPartitionKey).map(Column::getName).collect(Collectors.toList());
+  }
+
+  public List<String> getPrimaryKeys(ParserRuleContext ctx, String conn, String table) {
+    Row row = getRowDataType(ctx, conn, table);
+    if (row == null) {
+      return null;
+    }
+    return row.getColumns().stream().filter(Column::isPrimaryKey).map(Column::getName).collect(Collectors.toList());
   }
   
   /**
@@ -185,6 +193,7 @@ public class Meta {
           while (rs.next()) {
             String col = rs.getString(1);
             String typ = rs.getString(2);
+            String comment = rs.getString(3);
             if (row == null) {
               row = new Row();
             }
@@ -205,6 +214,9 @@ public class Meta {
               column.setPartitionKey(true);
             } else {
               row.addColumn(col, typ);
+              if (comment != null && comment.contains("__pk__")) {
+                row.getColumn(col).setPrimaryKey(true);
+              }
             }
           } 
           map.put(table, row);

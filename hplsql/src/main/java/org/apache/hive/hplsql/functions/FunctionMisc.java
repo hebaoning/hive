@@ -23,9 +23,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hive.hplsql.*;
@@ -33,7 +35,8 @@ import org.apache.hive.hplsql.*;
 public class FunctionMisc extends Function {
 
   private static final Pattern LOAD_FROM_PATTERN =
-      Pattern.compile("LOAD[ \t]+FROM[ \t]+\\((.*)\\)[ \t]+OF[ \t]+CURSOR[ \t]+(INSERT[ \t]+INTO[ \t].*)");
+      Pattern.compile("LOAD[ \t]+FROM[ \t]+\\((.*)\\)[ \t]+OF[ \t]+CURSOR[ \t]+INSERT[ \t]+INTO[ \t]+(.*)");
+      //Pattern.compile("LOAD[ \t]+FROM[ \t]+\\((.*)\\)[ \t]+OF[ \t]+CURSOR[ \t]+(INSERT[ \t]+INTO[ \t].*)");
   private static final Pattern IMPORT_DEL_INTO_PATTERN =
       Pattern.compile("IMPORT[ \t]+FROM[ \t]+/dev/null[ \t]+OF[ \t]+DEL[ \t]+REPLACE[ \t]+INTO[ \t]+(.*)");
 
@@ -201,7 +204,36 @@ public class FunctionMisc extends Function {
     // do magic
     Matcher m = LOAD_FROM_PATTERN.matcher(cmd);
     if (m.matches() && m.groupCount() == 2) {
-      exec.stackPush(m.group(2) + " " + m.group(1));
+      String selectStmt = m.group(1);
+      String dstTable = m.group(2);
+      List<String> primaryKeys = exec.getMeta().getPrimaryKeys(ctx, exec.conf.defaultConnection, dstTable);
+      List<String> partitionKeys = exec.getMeta().getPartitionKeys(ctx, exec.conf.defaultConnection, dstTable);
+
+      // FIXME suppose dstTable columns is same as srcTable columns
+      if (primaryKeys == null || primaryKeys.size() == 0) {
+        if (partitionKeys != null && partitionKeys.size() > 0) {
+          List<String> cols = exec.getMeta().getColumnNames(ctx, exec.conf.defaultConnection, dstTable);
+          String values = StringUtils.join(
+              cols.stream().map(col -> String.format("`%s`", col)).collect(Collectors.toList()),
+              ", ");
+          // FIXME
+          selectStmt = selectStmt.replace("*", values);
+        }
+        exec.stackPush("INSERT INTO " + dstTable + " " + selectStmt);
+      } else {
+        String condition = StringUtils.join(
+            primaryKeys.stream().map(col -> String.format("T.`%s` = S.`%s`", col, col)).collect(Collectors.toList()),
+            " AND ");
+        List<String> cols = exec.getMeta().getColumnNames(ctx, exec.conf.defaultConnection, dstTable);
+        String values = StringUtils.join(
+            cols.stream().map(col -> String.format("S.`%s`", col)).collect(Collectors.toList()),
+            ", ");
+        StringBuilder sql = new StringBuilder();
+        sql.append(String.format("MERGE INTO %s AS T USING (%s) AS S", dstTable, selectStmt));
+        sql.append(" ON ").append(condition);
+        sql.append(" WHEN NOT MATCHED THEN INSERT VALUES(").append(values).append(")");
+        exec.stackPush(sql);
+      }
       return;
     }
 

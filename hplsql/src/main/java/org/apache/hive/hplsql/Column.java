@@ -30,6 +30,7 @@ public class Column {
   int len;
   int scale;
   boolean partitionKey = false;
+  boolean primaryKey = false;
   
   Column(String name, String type) {
     this.name = name;
@@ -71,6 +72,10 @@ public class Column {
     this.partitionKey = partitionKey;
   }
 
+  void setPrimaryKey(boolean primaryKey) {
+    this.primaryKey = primaryKey;
+  }
+
   /**
    * Get the column name
    */
@@ -94,6 +99,10 @@ public class Column {
 
   boolean isPartitionKey() {
     return partitionKey;
+  }
+
+  boolean isPrimaryKey() {
+    return primaryKey;
   }
 }
 
