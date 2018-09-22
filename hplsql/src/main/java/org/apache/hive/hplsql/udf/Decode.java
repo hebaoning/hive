@@ -1,5 +1,6 @@
 package org.apache.hive.hplsql.udf;
 
+import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentLengthException;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentTypeException;
@@ -13,6 +14,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.IntObjectInspecto
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 
 @UDFType(deterministic = true)
+@Deprecated
 public class Decode extends GenericUDF {
 
   private GenericUDFUtils.ReturnObjectInspectorResolver returnOIResolver;
@@ -25,12 +27,7 @@ public class Decode extends GenericUDF {
     }
     argumentsOI = arguments;
     returnOIResolver = new GenericUDFUtils.ReturnObjectInspectorResolver(true);
-    if (!(returnOIResolver.update(arguments[0]) && returnOIResolver.update(arguments[1]))) {
-      throw new UDFArgumentTypeException(1,
-          "The first and seconds arguments of function decode should have the same type, "
-              + "but they are different: \"" + arguments[0].getTypeName()
-              + "\" and \"" + arguments[1].getTypeName() + "\"");
-    }
+    returnOIResolver.update(arguments[2]);
     return returnOIResolver.get();
   }
 
@@ -39,13 +36,13 @@ public class Decode extends GenericUDF {
     int i;
     Object obj1 = returnOIResolver.convertIfNecessary(arguments[0].get(), argumentsOI[0]);
     for (i = 1; i < arguments.length - 1; i += 2) {
-      Object obj2 = returnOIResolver.convertIfNecessary(arguments[i].get(), argumentsOI[i]);
+      Object obj2 = returnOIResolver.convertIfNecessary(arguments[i].get(), argumentsOI[0]);
       if (obj1.equals(obj2)) {
-        return returnOIResolver.convertIfNecessary(arguments[i+1].get(), argumentsOI[i+1]);
+        return returnOIResolver.convertIfNecessary(arguments[i+1].get(), argumentsOI[2]);
       }
     }
     if (i == arguments.length - 1) {
-      return returnOIResolver.convertIfNecessary(arguments[i].get(), argumentsOI[i]);
+      return returnOIResolver.convertIfNecessary(arguments[i].get(), argumentsOI[2]);
     }
     return null;
   }
