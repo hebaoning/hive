@@ -177,7 +177,8 @@ public class Udf extends GenericUDF {
     try {
       ResultSet rs = query.getResultSet();
       while (rs.next()) {
-        tableCache.get(funcName).put(rs.getString(1) + "||" + rs.getString(2), rs.getString(3));
+        String key = rs.getString(1) + "||" + rs.getString(2);
+        tableCache.get(funcName).putIfAbsent(key, rs.getString(3));
       }
     } catch (SQLException e) {
       exec.closeQuery(query, conn);
