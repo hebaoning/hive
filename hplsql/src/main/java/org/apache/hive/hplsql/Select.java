@@ -365,14 +365,14 @@ public class Select {
     boolean underInsertStmt = ctx.depth() >= 6
         && ctx.parent.parent.parent.parent.parent instanceof HplsqlParser.Insert_stmtContext;
     if (!underInsertStmt) {
-      trace(ctx, "not under insert statement");
+      trace(ctx, "select-list is not under insert statement");
       return false;
     }
 
     HplsqlParser.Subselect_stmtContext subselectStmtContext = (HplsqlParser.Subselect_stmtContext)ctx.parent;
     HplsqlParser.From_clauseContext fromClauseContext = subselectStmtContext.from_clause();
     if (fromClauseContext == null) {
-      trace(ctx, "need from-clause");
+      trace(ctx, "select-list need from-clause");
       return false;
     }
 /*
