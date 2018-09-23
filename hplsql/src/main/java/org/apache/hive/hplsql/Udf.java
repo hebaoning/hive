@@ -47,7 +47,9 @@ import java.util.Map;
 @UDFType(deterministic = false)
 public class Udf extends GenericUDF {
 
-  static Map<String, Map<String, String>> tableCache = new HashMap<>(2000);
+  static final String FN_GET_STA_CODE = "fn_get_sta_code";
+  static final String FN_DAY_TO_RMB = "fn_day_to_rmb";
+  static Map<String, Map<String, Object>> tableCache = new HashMap<>(2000);
 
   Exec exec;
   StringObjectInspector queryOI;
@@ -83,11 +85,10 @@ public class Udf extends GenericUDF {
 
     String query = queryOI.getPrimitiveJavaObject(arguments[0].get());
     if (query.toLowerCase().startsWith("fn_get_sta_code(")) {
-      if (!tableCache.containsKey("fn_get_sta_code")) {
-        cacheTable("fn_get_sta_code");
-      }
-      return tableCache.get("fn_get_sta_code").get(
-            exec.findVariable(":1").toString() + "||" + exec.findVariable(":2").toString());
+      return evaluateFnGetStaCode(arguments);
+    }
+    if (query.toLowerCase().startsWith("fn_day_to_rmb(")) {
+      return evaluateFnDayToRmb(arguments);
     }
 
     Var result = exec.run();
@@ -95,6 +96,30 @@ public class Udf extends GenericUDF {
       return result.toString();
     }
     return null;
+  }
+
+  Object evaluateFnGetStaCode(DeferredObject[] arguments) throws HiveException {
+    if (!tableCache.containsKey(FN_GET_STA_CODE)) {
+      cacheTable(FN_GET_STA_CODE);
+    }
+    return tableCache.get(FN_GET_STA_CODE).get(
+        exec.findVariable(":1").toString() + "||" + exec.findVariable(":2").toString());
+  }
+
+  Object evaluateFnDayToRmb(DeferredObject[] arguments) throws HiveException {
+    String cyc = exec.findVariable(":2").toString().toUpperCase();
+    Double amt = exec.findVariable(":3").doubleValue();
+
+    if (cyc.equals("CNY") || cyc.equals("T01") || cyc.equals("R01")) {
+      return amt;
+    }
+    if (!tableCache.containsKey(FN_DAY_TO_RMB)) {
+      cacheTable(FN_DAY_TO_RMB);
+    }
+    if (!tableCache.get(FN_DAY_TO_RMB).containsKey(cyc)) {
+      return 0;
+    }
+    return (Double)tableCache.get(FN_DAY_TO_RMB).get(cyc) * amt;
   }
 
   /**
@@ -172,6 +197,17 @@ public class Udf extends GenericUDF {
     funcName = funcName.toLowerCase();
     tableCache.put(funcName, new HashMap<>());
 
+    switch (funcName) {
+      case FN_GET_STA_CODE:
+        cacheFnGetStaCode(funcName);
+        break;
+      case FN_DAY_TO_RMB:
+        cacheFnDayToRmb(funcName);
+        break;
+    }
+  }
+
+  void cacheFnGetStaCode(String funcName) {
     String conn = exec.getStatementConnection();
     Query query = exec.executeQuery(null, "select sour_id, sour_code, code from sta_code_map", conn);
     try {
@@ -179,6 +215,33 @@ public class Udf extends GenericUDF {
       while (rs.next()) {
         String key = rs.getString(1) + "||" + rs.getString(2);
         tableCache.get(funcName).putIfAbsent(key, rs.getString(3));
+      }
+    } catch (SQLException e) {
+      exec.closeQuery(query, conn);
+    }
+  }
+
+  void cacheFnDayToRmb(String funcName) {
+    String conn = exec.getStatementConnection();
+    String maxDate = exec.findVariable(":1").toString();
+    String sqlFindMaxDate = String.format(
+        "select max(yrcadate) from dds_ker_affmyrpt where yrcars1b='' and yrcadate<='%s'", maxDate);
+    Query query = exec.executeQuery(null, sqlFindMaxDate, conn);
+    try {
+      ResultSet rs = query.getResultSet();
+      while (rs.next()) {
+        maxDate = rs.getString(1);
+      }
+
+      String sql = String.format(
+          "select yrcaccyc, yrcaexrt/yrcacuno from dds_ker_affmyrpt where yrcars1b='' and yrcadate='%s'", maxDate);
+      query = exec.executeQuery(null, sql, conn);
+      rs = query.getResultSet();
+      while (rs.next()) {
+        tableCache.get(funcName).putIfAbsent(
+            rs.getString(1).toUpperCase(),
+            rs.getBigDecimal(2).doubleValue()
+        );
       }
     } catch (SQLException e) {
       exec.closeQuery(query, conn);
