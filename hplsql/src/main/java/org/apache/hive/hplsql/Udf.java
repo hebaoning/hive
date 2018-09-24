@@ -47,9 +47,10 @@ import java.util.Map;
 @UDFType(deterministic = false)
 public class Udf extends GenericUDF {
 
-  static final String FN_GET_STA_CODE = "fn_get_sta_code";
-  static final String FN_DAY_TO_RMB = "fn_day_to_rmb";
-  static Map<String, Map<String, Object>> tableCache = new HashMap<>(2000);
+  private static final String FN_GET_STA_CODE = "fn_get_sta_code";
+  private static final String FN_DAY_TO_RMB = "fn_day_to_rmb";
+  private static final String FN_GET_TO_RMB_RATE = "fn_get_to_rmb_rate";
+  private static Map<String, Map<String, Object>> tableCache = new HashMap<>(2000);
 
   Exec exec;
   StringObjectInspector queryOI;
@@ -84,11 +85,14 @@ public class Udf extends GenericUDF {
     }
 
     String query = queryOI.getPrimitiveJavaObject(arguments[0].get());
-    if (query.toLowerCase().startsWith("fn_get_sta_code(")) {
+    if (query.toLowerCase().startsWith(FN_GET_STA_CODE + "(")) {
       return evaluateFnGetStaCode(arguments);
     }
-    if (query.toLowerCase().startsWith("fn_day_to_rmb(")) {
+    if (query.toLowerCase().startsWith(FN_DAY_TO_RMB + "(")) {
       return evaluateFnDayToRmb(arguments);
+    }
+    if (query.toLowerCase().startsWith(FN_GET_TO_RMB_RATE + "(")) {
+      return evaluateFnGetToRmbRate(arguments);
     }
 
     Var result = exec.run();
@@ -120,6 +124,23 @@ public class Udf extends GenericUDF {
       return 0;
     }
     return (Double)tableCache.get(FN_DAY_TO_RMB).get(cyc) * amt;
+  }
+
+  Object evaluateFnGetToRmbRate(DeferredObject[] arguments) throws HiveException {
+    String cyc = exec.findVariable(":2").toString().toUpperCase();
+    if (cyc.equals("CNY") || cyc.equals("T01") || cyc.equals("R01")) {
+      return 1;
+    }
+    if (cyc.equals("U01")) {
+      cyc = "USD";
+    }
+    if (!tableCache.containsKey(FN_GET_TO_RMB_RATE)) {
+      cacheTable(FN_GET_TO_RMB_RATE);
+    }
+    if (!tableCache.get(FN_GET_TO_RMB_RATE).containsKey(cyc)) {
+      return 0;
+    }
+    return tableCache.get(FN_GET_TO_RMB_RATE).get(cyc);
   }
 
   /**
@@ -204,6 +225,9 @@ public class Udf extends GenericUDF {
       case FN_DAY_TO_RMB:
         cacheFnDayToRmb(funcName);
         break;
+      case FN_GET_TO_RMB_RATE:
+        cacheFnGetToRmbRate(funcName);
+        break;
     }
   }
 
@@ -222,6 +246,33 @@ public class Udf extends GenericUDF {
   }
 
   void cacheFnDayToRmb(String funcName) {
+    String conn = exec.getStatementConnection();
+    String maxDate = exec.findVariable(":1").toString();
+    String sqlFindMaxDate = String.format(
+        "select max(yrcadate) from dds_ker_affmyrpt where yrcars1b='' and yrcadate<='%s'", maxDate);
+    Query query = exec.executeQuery(null, sqlFindMaxDate, conn);
+    try {
+      ResultSet rs = query.getResultSet();
+      while (rs.next()) {
+        maxDate = rs.getString(1);
+      }
+
+      String sql = String.format(
+          "select yrcaccyc, yrcaexrt/yrcacuno from dds_ker_affmyrpt where yrcars1b='' and yrcadate='%s'", maxDate);
+      query = exec.executeQuery(null, sql, conn);
+      rs = query.getResultSet();
+      while (rs.next()) {
+        tableCache.get(funcName).putIfAbsent(
+            rs.getString(1).toUpperCase(),
+            rs.getBigDecimal(2).doubleValue()
+        );
+      }
+    } catch (SQLException e) {
+      exec.closeQuery(query, conn);
+    }
+  }
+
+  void cacheFnGetToRmbRate(String funcName) {
     String conn = exec.getStatementConnection();
     String maxDate = exec.findVariable(":1").toString();
     String sqlFindMaxDate = String.format(
