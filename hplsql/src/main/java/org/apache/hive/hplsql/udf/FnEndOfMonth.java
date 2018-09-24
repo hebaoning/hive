@@ -15,6 +15,7 @@ import org.apache.hive.hplsql.Utils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -36,7 +37,12 @@ public class FnEndOfMonth extends GenericUDF {
   @Override
   public Object evaluate(DeferredObject[] arguments) throws HiveException {
     String var = ((StringObjectInspector)argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
-    LocalDate dt = LocalDate.parse(var);
+    LocalDate dt;
+    if (var.length() == 8) {
+      dt = LocalDate.parse(var, ISODateTimeFormat.basicDate());
+    } else {
+      dt = LocalDate.parse(var);
+    }
     LocalDate lastDate = dt.dayOfMonth().withMaximumValue();
     return new Text(lastDate.toString("yyyyMMdd"));
   }
