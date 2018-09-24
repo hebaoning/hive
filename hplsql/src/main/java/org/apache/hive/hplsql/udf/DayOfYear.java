@@ -11,6 +11,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectIn
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
 import org.apache.hadoop.io.IntWritable;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.sql.Date;
 import java.util.Calendar;
@@ -34,7 +35,11 @@ public class DayOfYear extends GenericUDF {
     Date dt;
     if (argumentsOI[0] instanceof StringObjectInspector) {
       String str = ((StringObjectInspector) argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
-      dt = new Date(LocalDateTime.parse(str).toDateTime().getMillis());
+      if (str.length() == 8) {
+        dt = new Date(LocalDateTime.parse(str, ISODateTimeFormat.basicDate()).toDateTime().getMillis());
+      } else {
+        dt = new Date(LocalDateTime.parse(str).toDateTime().getMillis());
+      }
     } else {
       dt = ((DateObjectInspector) argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
     }
