@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hive.hplsql.*;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.ISODateTimeFormat;
 
 public class FunctionDatetime extends Function {
 
@@ -310,6 +312,15 @@ public class FunctionDatetime extends Function {
       c.setTime(v.dateValue());
     } else if (v.type == Var.Type.TIMESTAMP) {
       c.setTime(v.timestampValue());
+    } else if (v.type == Var.Type.STRING) {
+      java.sql.Date dt;
+      if (v.toString().length() == 8) {
+        dt = new java.sql.Date(
+            LocalDateTime.parse(v.toString(), ISODateTimeFormat.basicDate()).toDateTime().getMillis());
+      } else {
+        dt = new java.sql.Date(LocalDateTime.parse(v.toString()).toDateTime().getMillis());
+      }
+      c.setTime(dt);
     } else {
       return null;
     }
