@@ -530,6 +530,15 @@ public class Var {
     if (type == Type.DECIMAL) {
       return (BigDecimal)value;
     }
+    if (type == Type.BIGINT) {
+      return new BigDecimal((Long) value);
+    }
+    if (type == Type.STRING) {
+      return new BigDecimal((String) value);
+    }
+    if (type == Type.DOUBLE) {
+      return new BigDecimal((Double) value);
+    }
     throw new NumberFormatException();
   }
   
