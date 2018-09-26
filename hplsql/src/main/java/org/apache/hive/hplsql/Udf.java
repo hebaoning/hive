@@ -40,7 +40,9 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Description(name = "hplsql", value = "_FUNC_('query' [, :1, :2, ...n]) - Execute HPL/SQL query", extended = "Example:\n" + " > SELECT _FUNC_('CURRENT_DATE') FROM src LIMIT 1;\n")
@@ -50,6 +52,7 @@ public class Udf extends GenericUDF {
   private static final String FN_GET_STA_CODE = "fn_get_sta_code";
   private static final String FN_DAY_TO_RMB = "fn_day_to_rmb";
   private static final String FN_GET_TO_RMB_RATE = "fn_get_to_rmb_rate";
+  private static final String GET_CODE_SPLIT = "get_code_split";
   private static Map<String, Map<String, Object>> tableCache = new HashMap<>(2000);
 
   Exec exec;
@@ -93,6 +96,9 @@ public class Udf extends GenericUDF {
     }
     if (query.toLowerCase().startsWith(FN_GET_TO_RMB_RATE + "(")) {
       return evaluateFnGetToRmbRate(arguments);
+    }
+    if (query.toLowerCase().startsWith(GET_CODE_SPLIT + "(")) {
+      return evaluateGetCodeSplit(arguments);
     }
 
     Var result = exec.run();
@@ -141,6 +147,26 @@ public class Udf extends GenericUDF {
       return 0;
     }
     return tableCache.get(FN_GET_TO_RMB_RATE).get(cyc);
+  }
+
+  Object evaluateGetCodeSplit(DeferredObject[] arguments) throws HiveException {
+    if (!tableCache.containsKey(GET_CODE_SPLIT)) {
+      cacheTable(GET_CODE_SPLIT);
+    }
+
+    String type = exec.findVariable(":1").toString();
+    BigDecimal value = exec.findVariable(":2").decimalValue();
+    List<List<Object>> table = (List<List<Object>>)tableCache.get(GET_CODE_SPLIT).get("table");
+    for (List<Object> row: table) {
+      String codeTypeId = (String) row.get(0);
+      BigDecimal lmtDown = (BigDecimal) row.get(1);
+      BigDecimal lmtUp = (BigDecimal) row.get(2);
+      String code = (String) row.get(3);
+      if (type.equals(codeTypeId) && value.compareTo(lmtDown) >= 1 && value.compareTo(lmtUp) <= 0) {
+        return code;
+      }
+    }
+    return null;
   }
 
   /**
@@ -228,6 +254,9 @@ public class Udf extends GenericUDF {
       case FN_GET_TO_RMB_RATE:
         cacheFnGetToRmbRate(funcName);
         break;
+      case GET_CODE_SPLIT:
+        cacheGetCodeSplit(funcName);
+        break;
     }
   }
 
@@ -294,6 +323,26 @@ public class Udf extends GenericUDF {
             rs.getBigDecimal(2).doubleValue()
         );
       }
+    } catch (SQLException e) {
+      exec.closeQuery(query, conn);
+    }
+  }
+
+  void cacheGetCodeSplit(String funcName) {
+    String conn = exec.getStatementConnection();
+    Query query = exec.executeQuery(null, "select code_type_id, lmt_down, lmt_up, code from sta_code_split", conn);
+    try {
+      ResultSet rs = query.getResultSet();
+      List<List<Object>> table = new ArrayList<>();
+      while (rs.next()) {
+        ArrayList<Object> row = new ArrayList<>();
+        row.add(rs.getString(1));
+        row.add(rs.getBigDecimal(2));
+        row.add(rs.getBigDecimal(3));
+        row.add(rs.getString(4));
+        table.add(row);
+      }
+      tableCache.get(funcName).putIfAbsent("table", table);
     } catch (SQLException e) {
       exec.closeQuery(query, conn);
     }
