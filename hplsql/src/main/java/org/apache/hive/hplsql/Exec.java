@@ -822,7 +822,11 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     addVariable(new Var(SQLSTATE, Var.Type.STRING, "00000"));
     addVariable(new Var(HOSTCODE, Var.Type.BIGINT, 0L)); 
     for (Map.Entry<String, String> v : arguments.getVars().entrySet()) {
-      addVariable(new Var(v.getKey(), Var.Type.STRING, v.getValue()));
+      if (v.getKey().startsWith("hplsql.")) {
+        exec.conf.setOption(v.getKey(), v.getValue());
+      } else {
+        addVariable(new Var(v.getKey(), Var.Type.STRING, v.getValue()));
+      }
     }    
     InputStream input = null;
     if (execString != null) {
