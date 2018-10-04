@@ -68,7 +68,7 @@ public class Interval {
       c.setTimeInMillis(c.getTimeInMillis() + milliseconds * a);
     }
     if (months != 0) {
-      c.add(Calendar.MONTH, months * a);
+      addMonth(c, months * a);
     }
     if (hours != 0) {
       c.add(Calendar.HOUR, hours * a);
@@ -165,5 +165,21 @@ public class Interval {
       s.append(" years");
     }
     return s.toString();
+  }
+
+  private Calendar addMonth(Calendar calendar, int numMonths) {
+    boolean lastDatOfMonth = isLastDayOfMonth(calendar);
+    calendar.add(Calendar.MONTH, numMonths);
+    if (lastDatOfMonth) {
+      int maxDd = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+      calendar.set(Calendar.DAY_OF_MONTH, maxDd);
+    }
+    return calendar;
+  }
+
+  private boolean isLastDayOfMonth(Calendar cal) {
+    int maxDd = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+    int dd = cal.get(Calendar.DAY_OF_MONTH);
+    return dd == maxDd;
   }
 }
