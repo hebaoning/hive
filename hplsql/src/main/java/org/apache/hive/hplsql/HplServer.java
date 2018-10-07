@@ -12,6 +12,10 @@ import org.apache.thrift.transport.TServerSocket;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class HplServer {
 
@@ -31,13 +35,23 @@ public class HplServer {
 
     String[] preloadFolders = exec.arguments.getPreloadFolders();
     if (preloadFolders != null) {
+      ExecutorService executorService = Executors.newFixedThreadPool(16);
+
       for (String folder : preloadFolders) {
         System.out.println("preload folder " + folder);
         Iterator<File> files = FileUtils.iterateFiles(
             new File(folder), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
         while (files.hasNext()) {
-          exec.includeFile(files.next().getAbsolutePath(), true);
+          String file = files.next().getAbsolutePath();
+          executorService.execute(new PreloadTask(file));
         }
+      }
+
+      try {
+        executorService.shutdown();
+        executorService.awaitTermination(1, TimeUnit.HOURS);
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     }
     return 0;
@@ -62,6 +76,21 @@ public class HplServer {
     } catch (Exception e) {
       System.out.println("hplsql server start error");
       e.printStackTrace();
+    }
+  }
+
+  static class PreloadTask implements Runnable {
+
+    String file;
+
+    PreloadTask(String file) {
+      this.file = file;
+    }
+
+    @Override
+    public void run() {
+      System.out.println("preload " + file);
+      exec.includeFile(file, true);
     }
   }
 }

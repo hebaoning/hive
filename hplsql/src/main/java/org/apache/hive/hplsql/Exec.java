@@ -925,7 +925,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     } 
     catch (Exception e) {
       if (showError) {
-        error(null, "INCLUDE file error: " + e.getMessage());
+        error(null, "INCLUDE file " + file + " error: " + e.getMessage());
         e.printStackTrace();
       }
     } 
@@ -1558,7 +1558,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
    * CREATE PROCEDURE statement
    */
   @Override 
-  public Integer visitCreate_procedure_stmt(HplsqlParser.Create_procedure_stmtContext ctx) {
+  public synchronized Integer visitCreate_procedure_stmt(HplsqlParser.Create_procedure_stmtContext ctx) {
     exec.function.addUserProcedure(ctx);
     addLocalUdf(ctx);                      // Add procedures as they can be invoked by functions
     return 0; 
