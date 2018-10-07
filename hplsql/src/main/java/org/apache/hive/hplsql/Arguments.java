@@ -18,7 +18,9 @@
 
 package org.apache.hive.hplsql;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.cli.CommandLine;
@@ -30,16 +32,20 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 
 public class Arguments {
+
+  private static final int DEFAULT_SERVER_PORT = 8090;
+  private static Options options = new Options();
+
   private CommandLine commandLine;
-  private Options options = new Options();
-  
+
   String execString;
   String fileName;  
   String main;
+  String[] preloadFolders;
+  String port;
   Map<String, String> vars = new HashMap<String, String>();
-  
-  @SuppressWarnings("static-access")
-  Arguments() {
+
+  static {
     // -e 'query'
     options.addOption(OptionBuilder
         .hasArg()
@@ -52,8 +58,22 @@ public class Arguments {
         .hasArg()
         .withArgName("filename")
         .withDescription("HPL/SQL from a file")
-        .create('f'));    
-    
+        .create('f'));
+
+    // -preload <sp folder>
+    options.addOption(OptionBuilder
+        .hasArgs()
+        .withArgName("sp-folder")
+        .withDescription("Preload sp")
+        .create("preload"));
+
+    // -preload <sp folder>
+    options.addOption(OptionBuilder
+        .hasArg()
+        .withArgName("port")
+        .withDescription("Listening port")
+        .create("port"));
+
     // -main entry_point_name
     options.addOption(OptionBuilder
         .hasArg()
@@ -99,7 +119,10 @@ public class Arguments {
 
     // [-ast|--ast]
     options.addOption(new Option("ast", "ast", false, "Output AST to ast.jpg"));
-    
+
+    // [-server|--server]
+    options.addOption(new Option("server", "server", false, "Run in server mode"));
+
     // [-H|--help]
     options.addOption(new Option("H", "help", false, "Print help information"));
   }
@@ -113,6 +136,9 @@ public class Arguments {
       execString = commandLine.getOptionValue('e');
       fileName = commandLine.getOptionValue('f');
       main = commandLine.getOptionValue("main");
+      preloadFolders = commandLine.getOptionValues("preload");
+      port = commandLine.getOptionValue("port");
+
       Properties p = commandLine.getOptionProperties("hiveconf");
       for(String key : p.stringPropertyNames()) {
         vars.put(key, p.getProperty(key));
@@ -152,6 +178,17 @@ public class Arguments {
   public String getMain() {
     return main;
   }
+
+  public String[] getPreloadFolders() {
+    return preloadFolders;
+  }
+
+  public int getPort() {
+    if (commandLine.hasOption("port")) {
+      return Integer.parseInt(port);
+    }
+    return DEFAULT_SERVER_PORT;
+  }
   
   /**
    * Get the variables
@@ -164,20 +201,18 @@ public class Arguments {
    * Test whether version option is set
    */
   public boolean hasVersionOption() {
-    if(commandLine.hasOption("version")) {
-      return true;
-    }
-    return false;
+    return commandLine.hasOption("version");
   }
 
   /**
    * Test whether ast option is set
    */
   public boolean hasAstOption() {
-    if (commandLine.hasOption("ast")) {
-      return true;
-    }
-    return false;
+    return commandLine.hasOption("ast");
+  }
+
+  public boolean hasServerOption() {
+    return commandLine.hasOption("server");
   }
 
   /**

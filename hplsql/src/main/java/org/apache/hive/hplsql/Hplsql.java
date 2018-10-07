@@ -18,8 +18,19 @@
 
 package org.apache.hive.hplsql;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Hplsql {
+
   public static void main(String[] args) throws Exception {
-    System.exit(new Exec().run(args));
+    System.setProperty("log4j.configurationFile", "hive-log4j2.properties");
+    List<String> argList = Arrays.asList(args);
+    if (argList.contains("-server") || argList.contains("--server")) {
+      HplServer.init(args);
+      HplServer.startServer();
+    } else {
+      System.exit(new Exec().run(args));
+    }
   }
 }

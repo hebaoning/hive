@@ -58,7 +58,11 @@ public class Function {
     exec = e;  
     trace = exec.getTrace();
   }
-  
+
+  public HplsqlParser.Create_procedure_stmtContext getProcedure(String name) {
+    return procMap.get(name);
+  }
+
   /** 
    * Register functions
    */
@@ -267,7 +271,10 @@ public class Function {
     if (trace) {
       trace(callCtx, "EXEC PROCEDURE " + name);
     }
-    HplsqlParser.Create_procedure_stmtContext procCtx = procMap.get(name.toUpperCase());    
+    HplsqlParser.Create_procedure_stmtContext procCtx = procMap.get(name.toUpperCase());
+    if (procCtx == null) {
+      procCtx = HplServer.getProcedure(name.toUpperCase());
+    }
     if (procCtx == null) {
       trace(callCtx, "Procedure not found");
       return false;

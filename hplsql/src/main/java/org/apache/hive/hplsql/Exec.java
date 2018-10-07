@@ -124,13 +124,17 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   boolean info = true;
   boolean offline = false;
   boolean outputAst = false;
-  
+
   Exec() {
     exec = this;
   }
   
   Exec(Exec exec) {
     this.exec = exec;
+  }
+
+  public HplsqlParser.Create_procedure_stmtContext getProcedure(String name) {
+    return exec.function.getProcedure(name);
   }
 
   /** 
@@ -800,7 +804,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
       return 1;
     }
     // specify the default log4j2 properties file.
-    System.setProperty("log4j.configurationFile", "hive-log4j2.properties");
+    //System.setProperty("log4j.configurationFile", "hive-log4j2.properties");
     conf = new Conf();
     conf.init();    
     conn = new Conn(this);
@@ -827,7 +831,8 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
       } else {
         addVariable(new Var(v.getKey(), Var.Type.STRING, v.getValue()));
       }
-    }    
+    }
+
     InputStream input = null;
     if (execString != null) {
       input = new ByteArrayInputStream(execString.getBytes("UTF-8"));
@@ -853,7 +858,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     includeRcFile();    
     return 0;
   }
-  
+
   /**
    * Parse command line arguments
    */
@@ -921,6 +926,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     catch (Exception e) {
       if (showError) {
         error(null, "INCLUDE file error: " + e.getMessage());
+        e.printStackTrace();
       }
     } 
     return false;
