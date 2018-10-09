@@ -63,6 +63,10 @@ public class Function {
     return procMap.get(name);
   }
 
+  public HplsqlParser.Create_function_stmtContext getFunction(String name) {
+    return userMap.get(name);
+  }
+
   /** 
    * Register functions
    */
@@ -180,7 +184,10 @@ public class Function {
   public boolean execUser(String name, HplsqlParser.Expr_func_paramsContext ctx) {
     HplsqlParser.Create_function_stmtContext userCtx = userMap.get(name.toUpperCase());
     if (userCtx == null) {
-      return false;
+      userCtx = HplServer.getFunction(name.toUpperCase());
+      if (userCtx == null) {
+        return false;
+      }
     }
     if (trace) {
       trace(ctx, "EXEC FUNCTION " + name);
@@ -202,7 +209,10 @@ public class Function {
   public boolean execUserSql(HplsqlParser.Expr_func_paramsContext ctx, String name) {
     HplsqlParser.Create_function_stmtContext userCtx = userMap.get(name.toUpperCase());
     if (userCtx == null) {
-      return false;
+      userCtx = HplServer.getFunction(name.toUpperCase());
+      if (userCtx == null) {
+        return false;
+      }
     }
     StringBuilder sql = new StringBuilder();
     sql.append("hplsql('");

@@ -23,9 +23,11 @@ import java.util.List;
 
 public class Hplsql {
 
+  public static List<String> argList;
+
   public static void main(String[] args) throws Exception {
     System.setProperty("log4j.configurationFile", "hive-log4j2.properties");
-    List<String> argList = Arrays.asList(args);
+    argList = Arrays.asList(args);
     if (argList.contains("-server") || argList.contains("--server")) {
       HplServer.init(args);
       HplServer.startServer();

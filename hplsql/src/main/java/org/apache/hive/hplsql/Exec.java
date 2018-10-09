@@ -137,6 +137,10 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     return exec.function.getProcedure(name);
   }
 
+  public HplsqlParser.Create_function_stmtContext getFunction(String name) {
+    return exec.function.getFunction(name);
+  }
+
   /** 
    * Set a variable using a value from the parameter or the stack 
    */
@@ -855,7 +859,9 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
       viewer.setSize(15000, 3000);
       viewer.save("./ast.jpg");
     }
-    includeRcFile();    
+    if (!arguments.hasServerOption()) {
+      includeRcFile();
+    }
     return 0;
   }
 
@@ -896,7 +902,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
    * Include statements from .hplsqlrc and hplsql rc files
    */
   void includeRcFile() {
-    if (includeFile(Conf.DOT_HPLSQLRC, false)) {
+    if (includeFile(Conf.DOT_HPLSQLRC, true)) {
       dotHplsqlrcExists = true;
     }
     else {

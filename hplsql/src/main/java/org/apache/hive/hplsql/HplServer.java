@@ -12,7 +12,7 @@ import org.apache.thrift.transport.TServerSocket;
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.concurrent.Executor;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -28,10 +28,19 @@ public class HplServer {
     return exec.function.getProcedure(name);
   }
 
+  public static HplsqlParser.Create_function_stmtContext getFunction(String name) {
+    if (exec == null) {
+      return null;
+    }
+    return exec.function.getFunction(name);
+  }
+
   public static int init(String[] args) {
     exec = new Exec();
     exec.function = new Function(exec);
     exec.arguments.parse(args);
+
+    exec.includeRcFile();
 
     String[] preloadFolders = exec.arguments.getPreloadFolders();
     if (preloadFolders != null) {
