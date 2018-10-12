@@ -1353,21 +1353,45 @@ public class Stmt {
   public Integer merge(HplsqlParser.Merge_stmtContext ctx) {
     trace(ctx, "MERGE");
 //    String sql = exec.getFormattedText(ctx);
-    StringBuilder sql = new StringBuilder("MERGE INTO ");
-
-    sql.append(evalPop(ctx.merge_table(0)))
-        .append(" USING ").append(evalPop(ctx.merge_table(1)));
 
     boolean oldBuildSql = exec.buildSql;
     exec.buildSql = true;
+
+    StringBuilder sql = new StringBuilder("MERGE INTO ");
+    sql.append(evalPop(ctx.merge_table(0)))
+        .append(" USING ").append(evalPop(ctx.merge_table(1)));
     sql.append(" ON ").append(evalPop(ctx.bool_expr()));
+
+    StringBuilder sqlUpdate = new StringBuilder(sql);
+    boolean hasOtherAction = false;
+    boolean hasUpdateAction = false;
     for (int i = 0; i < ctx.merge_condition().size(); i++) {
-      sql.append(" ").append(evalPop(ctx.merge_condition(i)));
+      if (ctx.merge_condition(i).merge_action() != null && ctx.merge_condition(i).merge_action().T_UPDATE() != null) {
+        hasUpdateAction = true;
+        sqlUpdate.append(" ").append(evalPop(ctx.merge_condition(i)));
+      } else if (ctx.merge_condition(i).T_ELSE() == null) {
+        hasOtherAction = true;
+        sql.append(" ").append(evalPop(ctx.merge_condition(i)));
+      }
     }
+
     exec.buildSql = oldBuildSql;
 
-    trace(ctx, sql.toString());
-    Query query = exec.executeSql(ctx, sql.toString(), exec.conf.defaultConnection);
+    if (hasUpdateAction) {
+      int result = doQuery(ctx, sqlUpdate.toString());
+      if (result != 0) {
+        return result;
+      }
+    }
+    if (hasOtherAction) {
+      return doQuery(ctx, sql.toString());
+    }
+    return 0;
+  }
+
+  private int doQuery(ParserRuleContext ctx, String sql) {
+    trace(ctx, sql);
+    Query query = exec.executeSql(ctx, sql, exec.conf.defaultConnection);
     if (query.error()) {
       exec.signal(query);
       return 1;
@@ -1376,7 +1400,7 @@ public class Stmt {
     exec.closeQuery(query, exec.conf.defaultConnection);
     return 0;
   }
-  
+
   /**
    * PRINT Statement 
    */
