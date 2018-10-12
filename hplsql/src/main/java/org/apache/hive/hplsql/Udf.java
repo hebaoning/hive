@@ -53,6 +53,7 @@ public class Udf extends GenericUDF {
   private static final String FN_DAY_TO_RMB = "fn_day_to_rmb";
   private static final String FN_GET_TO_RMB_RATE = "fn_get_to_rmb_rate";
   private static final String GET_CODE_SPLIT = "get_code_split";
+  private static final String GET_USD_EXCHANGE_RATE = "get_usd_exchange_rate";
   private static Map<String, Map<String, Object>> tableCache = new HashMap<>(2000);
 
   Exec exec;
@@ -99,6 +100,9 @@ public class Udf extends GenericUDF {
     }
     if (query.toLowerCase().startsWith(GET_CODE_SPLIT + "(")) {
       return evaluateGetCodeSplit(arguments);
+    }
+    if (query.toLowerCase().startsWith(GET_USD_EXCHANGE_RATE + "(")) {
+      return evaluateGetUsdExchangeRate(arguments);
     }
 
     Var result = exec.run();
@@ -147,6 +151,22 @@ public class Udf extends GenericUDF {
       return 0;
     }
     return tableCache.get(FN_GET_TO_RMB_RATE).get(cyc);
+  }
+
+  Object evaluateGetUsdExchangeRate(DeferredObject[] arguments) throws HiveException {
+    String cyc = exec.findVariable(":2").toString().toUpperCase();
+    Double amt = exec.findVariable(":3").doubleValue();
+
+    if (cyc.equals("USD")) {
+      return amt;
+    }
+    if (!tableCache.containsKey(GET_USD_EXCHANGE_RATE)) {
+      cacheTable(GET_USD_EXCHANGE_RATE);
+    }
+    if (!tableCache.get(GET_USD_EXCHANGE_RATE).containsKey(cyc)) {
+      return 0;
+    }
+    return (Double)tableCache.get(GET_USD_EXCHANGE_RATE).get(cyc) * amt;
   }
 
   Object evaluateGetCodeSplit(DeferredObject[] arguments) throws HiveException {
@@ -257,6 +277,9 @@ public class Udf extends GenericUDF {
       case GET_CODE_SPLIT:
         cacheGetCodeSplit(funcName);
         break;
+      case GET_USD_EXCHANGE_RATE:
+        cacheGetUsdExchangeRate(funcName);
+        break;
     }
   }
 
@@ -290,6 +313,43 @@ public class Udf extends GenericUDF {
           "select yrcaccyc, yrcaexrt/yrcacuno from dds_ker_affmyrpt where yrcars1b='' and yrcadate='%s'", maxDate);
       query = exec.executeQuery(null, sql, conn);
       rs = query.getResultSet();
+      while (rs.next()) {
+        tableCache.get(funcName).putIfAbsent(
+            rs.getString(1).toUpperCase(),
+            rs.getBigDecimal(2).doubleValue()
+        );
+      }
+    } catch (SQLException e) {
+      exec.closeQuery(query, conn);
+    }
+  }
+
+  void cacheGetUsdExchangeRate(String funcName) {
+    String conn = exec.getStatementConnection();
+    String date = exec.findVariable(":1").toString();
+    String sqlFindMinDate = String.format(
+        "select min(sicadate) from nds_ker_affmsipm where fn_left(sicadate,6)=fn_left('%s',6) and sicars1b != '9'", date);
+    String sqlFindMaxDate = String.format(
+        "select max(sicadate) from nds_ker_affmsipm where sicadate<='%s' and sicars1b != '9'", date);
+
+    Query query = null;
+    try {
+      String rateDate = null;
+      for (String sql : new String[] {sqlFindMinDate, sqlFindMaxDate}) {
+        query = exec.executeQuery(null, sql, conn);
+        ResultSet rs = query.getResultSet();
+        while (rs.next()) {
+          rateDate = rs.getString(1);
+        }
+        if (rateDate != null) {
+          break;
+        }
+      }
+
+      String sql = String.format(
+          "select sicaccyc, sicaexrt/sicacuno from nds_ker_affmsipm where sicars1b != '9' and sicadate='%s'", rateDate);
+      query = exec.executeQuery(null, sql, conn);
+      ResultSet rs = query.getResultSet();
       while (rs.next()) {
         tableCache.get(funcName).putIfAbsent(
             rs.getString(1).toUpperCase(),
