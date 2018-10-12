@@ -2498,10 +2498,10 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     // FIXME: only support insert table
     if (ctx.T_INSERT() != null) {
       sql.append("INSERT");
-      List<String> partitionKeys = meta.getPartitionKeys(ctx, exec.conf.defaultConnection, tableName);
-      if (partitionKeys != null && partitionKeys.size() > 0) {
-        sql.append(" PARTITION(").append(StringUtils.join(partitionKeys, ",")).append(")");
-      }
+//      List<String> partitionKeys = meta.getPartitionKeys(ctx, exec.conf.defaultConnection, tableName);
+//      if (partitionKeys != null && partitionKeys.size() > 0) {
+//        sql.append(" PARTITION(").append(StringUtils.join(partitionKeys, ",")).append(")");
+//      }
 
       List<String> rowValues = ctx.insert_stmt_row().expr().stream()
           .map(it -> evalPop(it).toString()).collect(Collectors.toList());
