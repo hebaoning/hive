@@ -361,7 +361,7 @@ public class Stmt {
       sql.append("\nLOCATION '").append(conf.tempTablesLocation).append("/").append(tableName).append("'");
     }
     if (enableAcid) {
-      sql.append("\nTBLPROPERTIES ('transactional'='true')");
+      sql.append("\nTBLPROPERTIES ('transactional'='true', 'transactional_properties'='default')");
     }
   }
 
