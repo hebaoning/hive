@@ -114,6 +114,10 @@ public class Function {
     if (execUserSql(ctx, name)) {
       return;
     }
+    // FIXME: left and right are reserved words in Hive
+    if (name.toLowerCase().equals("left") || name.toLowerCase().equals("right")) {
+      name = "FN_" + name;
+    }
     StringBuilder sql = new StringBuilder();
     sql.append(name);
     sql.append("(");
