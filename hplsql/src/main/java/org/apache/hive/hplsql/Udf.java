@@ -59,7 +59,8 @@ public class Udf extends GenericUDF {
   Exec exec;
   StringObjectInspector queryOI;
   ObjectInspector[] argumentsOI;
-  
+
+
   /**
    * Initialize UDF
    */
@@ -196,7 +197,7 @@ public class Udf extends GenericUDF {
     exec = new Exec();
     exec.enterGlobalScope();
     String query = queryOI.getPrimitiveJavaObject(arguments[0].get());
-    String[] args = { "-e", query, "-trace" };
+    String[] args = { "-e", query };
     try {
       exec.setUdfRun(true);
       exec.init(args);

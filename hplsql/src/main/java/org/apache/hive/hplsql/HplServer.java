@@ -21,6 +21,12 @@ public class HplServer {
 
   private static Exec exec;
 
+  static {
+    exec = new Exec();
+    exec.function = new Function(exec);
+    exec.includeRcFile();
+  }
+
   public static HplsqlParser.Create_procedure_stmtContext getProcedure(String name) {
     if (exec == null) {
       return null;
@@ -36,16 +42,10 @@ public class HplServer {
   }
 
   public static int init(String[] args) {
-    exec = new Exec();
-    exec.function = new Function(exec);
     exec.arguments.parse(args);
-
-    exec.includeRcFile();
-
     String[] preloadFolders = exec.arguments.getPreloadFolders();
     if (preloadFolders != null) {
       ExecutorService executorService = Executors.newFixedThreadPool(16);
-
       for (String folder : preloadFolders) {
         System.out.println("preload folder " + folder);
         Iterator<File> files = FileUtils.iterateFiles(

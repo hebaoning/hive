@@ -859,9 +859,9 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
       viewer.setSize(15000, 3000);
       viewer.save("./ast.jpg");
     }
-    if (!arguments.hasServerOption()) {
-      includeRcFile();
-    }
+//    if (!arguments.hasServerOption()) {
+//      includeRcFile();
+//    }
     return 0;
   }
 
