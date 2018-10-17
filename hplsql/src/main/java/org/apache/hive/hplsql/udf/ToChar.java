@@ -14,6 +14,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.TimestampObjectIn
 import org.apache.hadoop.io.Text;
 import org.apache.hive.hplsql.Utils;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -48,9 +49,14 @@ public class ToChar extends GenericUDF {
       String sqlFormat = ((StringObjectInspector)argumentsOI[1]).getPrimitiveJavaObject(arguments[1].get());
       String format = Utils.convertSqlDatetimeFormat(sqlFormat);
       if (argumentsOI[0] instanceof StringObjectInspector) {
+        Date dt;
         String str = ((StringObjectInspector) argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
-        Date t = new Date(LocalDateTime.parse(str).toDateTime().getMillis());
-        return new Text(new SimpleDateFormat(format).format(t));
+        if (str.length() == 8) {
+          dt = new Date(LocalDateTime.parse(str, ISODateTimeFormat.basicDate()).toDateTime().getMillis());
+        } else {
+          dt = new Date(LocalDateTime.parse(str).toDateTime().getMillis());
+        }
+        return new Text(new SimpleDateFormat(format).format(dt));
       }
       if (argumentsOI[0] instanceof DateObjectInspector) {
         Date t = ((DateObjectInspector) argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
