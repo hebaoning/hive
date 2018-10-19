@@ -902,16 +902,16 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
    * Include statements from .hplsqlrc and hplsql rc files
    */
   void includeRcFile() {
-    if (includeFile(Conf.DOT_HPLSQLRC, true)) {
+    if (includeFile(Conf.DOT_HPLSQLRC, true, true)) {
       dotHplsqlrcExists = true;
     }
     else {
-      if (includeFile(Conf.HPLSQLRC, false)) {
+      if (includeFile(Conf.HPLSQLRC, false, true)) {
         hplsqlrcExists = true;
       }
     }
     if (udfRun) {
-      includeFile(Conf.HPLSQL_LOCALS_SQL, true);
+      includeFile(Conf.HPLSQL_LOCALS_SQL, true, true);
     }
   }
   
@@ -919,6 +919,15 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
    * Include statements from a file
    */
   boolean includeFile(String file, boolean showError) {
+    return includeFile(file, showError, false);
+  }
+
+  boolean includeFile(String file, boolean showError, boolean force) {
+    if (!force && arguments.hasServerOption()) {
+      trace(null, "bypass include in server mode");
+      return true;
+    }
+
     try {
       String content = FileUtils.readFileToString(new java.io.File(file), "UTF-8");
       if (content != null && !content.isEmpty()) {
@@ -928,13 +937,13 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
         new Exec(this).include(content);
         return true;
       }
-    } 
+    }
     catch (Exception e) {
       if (showError) {
         error(null, "INCLUDE file " + file + " error: " + e.getMessage());
         e.printStackTrace();
       }
-    } 
+    }
     return false;
   }
   

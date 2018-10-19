@@ -75,7 +75,9 @@ public class HplServer {
 
       //TServer.Args tArgs = new TServer.Args(serverTransport);
       TThreadPoolServer.Args tArgs =
-          new TThreadPoolServer.Args(serverTransport).minWorkerThreads(16).maxWorkerThreads(16);
+          new TThreadPoolServer.Args(serverTransport)
+              .minWorkerThreads(64).maxWorkerThreads(128)
+              .requestTimeout(60);
       tArgs.processor(tprocessor);
       tArgs.protocolFactory(new TBinaryProtocol.Factory());
 
@@ -99,7 +101,7 @@ public class HplServer {
     @Override
     public void run() {
       System.out.println("preload " + file);
-      exec.includeFile(file, true);
+      exec.includeFile(file, true, true);
     }
   }
 }
