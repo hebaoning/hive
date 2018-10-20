@@ -114,11 +114,15 @@ public class Udf extends GenericUDF {
   }
 
   Object evaluateFnGetStaCode(DeferredObject[] arguments) throws HiveException {
+    Var v1 = exec.findVariable(":1");
+    Var v2 = exec.findVariable(":2");
+    if (v1 == null || v2 == null) {
+      return null;
+    }
     if (!tableCache.containsKey(FN_GET_STA_CODE)) {
       cacheTable(FN_GET_STA_CODE);
     }
-    return tableCache.get(FN_GET_STA_CODE).get(
-        exec.findVariable(":1").toString() + "||" + exec.findVariable(":2").toString());
+    return tableCache.get(FN_GET_STA_CODE).get(v1.toString() + "||" + v2.toString());
   }
 
   Object evaluateFnDayToRmb(DeferredObject[] arguments) throws HiveException {
