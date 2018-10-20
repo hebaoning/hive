@@ -773,6 +773,13 @@ public class Stmt {
    */
   public Integer insert(HplsqlParser.Insert_stmtContext ctx) {
     exec.stmtConnList.clear();
+    // FIXME: Workaround to bypass etl.proclog insert
+    String tableName = evalPop(ctx.table_name()).toString();
+    if (tableName.toLowerCase().equals("etl.proclog")) {
+      trace(ctx, "bypass etl.proclog");
+      return 0;
+    }
+
     if (ctx.select_stmt() != null) {
       return insertSelect(ctx);
     }
