@@ -2782,10 +2782,10 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
 		  return;
 	  }
 		if (ctx != null) {
-	    System.out.println("Ln:" + ctx.getStart().getLine() + " " + message);
+	    System.out.println(Thread.currentThread().getId() + " Ln:" + ctx.getStart().getLine() + " " + message);
 		}
 		else {
-		  System.out.println(message);
+		  System.out.println(Thread.currentThread().getId() + " " + message);
 		}
   }
   
