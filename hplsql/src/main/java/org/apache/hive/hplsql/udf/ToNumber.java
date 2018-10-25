@@ -31,6 +31,9 @@ public class ToNumber extends GenericUDF {
 
   @Override
   public Object evaluate(DeferredObject[] arguments) throws HiveException {
+    if (arguments[0].get() == null) {
+      return null;
+    }
     String var = ((StringObjectInspector)argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
     return new HiveDecimalWritable(HiveDecimal.create(var));
   }
