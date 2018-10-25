@@ -52,8 +52,13 @@ public class ToChar extends GenericUDF {
         Date dt;
         String str = ((StringObjectInspector) argumentsOI[0]).getPrimitiveJavaObject(arguments[0].get());
         if (str.length() == 8) {
+          // YYYYMMDD
           dt = new Date(LocalDateTime.parse(str, ISODateTimeFormat.basicDate()).toDateTime().getMillis());
         } else {
+          if (str.length() >= 13) {
+            // YYYY-MM-DD HH:mm:ss.SSS
+            str = str.replace(" ", "T");
+          }
           dt = new Date(LocalDateTime.parse(str).toDateTime().getMillis());
         }
         return new Text(new SimpleDateFormat(format).format(dt));

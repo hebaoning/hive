@@ -38,6 +38,10 @@ public class DayOfYear extends GenericUDF {
       if (str.length() == 8) {
         dt = new Date(LocalDateTime.parse(str, ISODateTimeFormat.basicDate()).toDateTime().getMillis());
       } else {
+        if (str.length() >= 13) {
+          // YYYY-MM-DD HH:mm:ss.SSS
+          str = str.replace(" ", "T");
+        }
         dt = new Date(LocalDateTime.parse(str).toDateTime().getMillis());
       }
     } else {
