@@ -510,7 +510,7 @@ public class Var {
 	  else if (type == Type.STRING) {
 	    return Integer.parseInt((String)value);
 	  }
-	  throw new NumberFormatException();
+	  throw new NumberFormatException("invalid type " + type);
 	}
 	
 	/**
@@ -520,7 +520,7 @@ public class Var {
     if (type == Type.BIGINT) {
       return ((Long)value).longValue();
     }
-    throw new NumberFormatException();
+    throw new NumberFormatException("invalid type " + type);
   }
   
   /**
@@ -539,7 +539,7 @@ public class Var {
     if (type == Type.DOUBLE) {
       return new BigDecimal((Double) value);
     }
-    throw new NumberFormatException();
+    throw new NumberFormatException("invalid type " + type);
   }
   
   /**
@@ -555,7 +555,10 @@ public class Var {
     else if (type == Type.DECIMAL) {
       return ((BigDecimal)value).doubleValue();
     }
-    throw new NumberFormatException();
+    else if (type == Type.STRING) {
+      return new BigDecimal((String) value).doubleValue();
+    }
+    throw new NumberFormatException("invalid type " + type);
   }
 
   /**
