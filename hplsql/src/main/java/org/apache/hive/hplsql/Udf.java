@@ -52,6 +52,7 @@ public class Udf extends GenericUDF {
   private static final String FN_GET_STA_CODE = "fn_get_sta_code";
   private static final String FN_DAY_TO_RMB = "fn_day_to_rmb";
   private static final String FN_GET_TO_RMB_RATE = "fn_get_to_rmb_rate";
+  private static final String FN_R01_TO_USD = "fn_r01_to_usd";
   private static final String GET_CODE_SPLIT = "get_code_split";
   private static final String GET_USD_EXCHANGE_RATE = "get_usd_exchange_rate";
   private static Map<String, Map<String, Object>> tableCache = new HashMap<>(2000);
@@ -98,6 +99,9 @@ public class Udf extends GenericUDF {
     }
     if (query.toLowerCase().startsWith(FN_GET_TO_RMB_RATE + "(")) {
       return evaluateFnGetToRmbRate(arguments);
+    }
+    if (query.toLowerCase().startsWith(FN_R01_TO_USD + "(")) {
+      return evaluateFnR01ToUsd(arguments);
     }
     if (query.toLowerCase().startsWith(GET_CODE_SPLIT + "(")) {
       return evaluateGetCodeSplit(arguments);
@@ -156,6 +160,19 @@ public class Udf extends GenericUDF {
       return 0;
     }
     return tableCache.get(FN_GET_TO_RMB_RATE).get(cyc);
+  }
+
+  Object evaluateFnR01ToUsd(DeferredObject[] arguments) throws HiveException {
+    String cyc = "USD";
+    Double amt = exec.findVariable(":3").doubleValue();
+
+    if (!tableCache.containsKey(FN_GET_TO_RMB_RATE)) {
+      cacheTable(FN_GET_TO_RMB_RATE);
+    }
+    if (!tableCache.get(FN_GET_TO_RMB_RATE).containsKey(cyc)) {
+      return 0;
+    }
+    return amt / (Double)tableCache.get(FN_GET_TO_RMB_RATE).get(cyc);
   }
 
   Object evaluateGetUsdExchangeRate(DeferredObject[] arguments) throws HiveException {
