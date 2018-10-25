@@ -76,8 +76,8 @@ public class HplServer {
       //TServer.Args tArgs = new TServer.Args(serverTransport);
       TThreadPoolServer.Args tArgs =
           new TThreadPoolServer.Args(serverTransport)
-              .minWorkerThreads(64).maxWorkerThreads(128)
-              .requestTimeout(60);
+              .minWorkerThreads(256).maxWorkerThreads(512)
+              .requestTimeout(120);
       tArgs.processor(tprocessor);
       tArgs.protocolFactory(new TBinaryProtocol.Factory());
 
