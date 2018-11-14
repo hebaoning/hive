@@ -1053,11 +1053,8 @@ bool_expr_binary_operator :
 
 expr :
        expr interval_item
-     | expr T_MUL expr 
-     | expr T_DIV expr  
-     | expr T_ADD expr  
-     | expr T_SUB expr   
-     | expr T_MOD expr
+     | expr (T_MUL | T_DIV | T_MOD) expr
+     | expr (T_ADD | T_SUB) expr
      | T_OPEN_P select_stmt T_CLOSE_P
      | T_OPEN_P expr T_CLOSE_P 
      | expr_interval 
