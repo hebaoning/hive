@@ -78,8 +78,14 @@ public class MonthBetween extends GenericUDF {
 
   @Override
   public Object evaluate(DeferredObject[] arguments) throws HiveException {
-    String date1Str = dtConverters[0].convert(arguments[0].get()).toString();
-    String date2Str = dtConverters[1].convert(arguments[1].get()).toString();
+    String date1Str = "18991231";
+    String date2Str = "18991231";
+    if (arguments[0].get() != null) {
+      date1Str = dtConverters[0].convert(arguments[0].get()).toString();
+    }
+    if (arguments[1].get() != null) {
+      date2Str = dtConverters[1].convert(arguments[1].get()).toString();
+    }
     if (date1Str.length() != 8 || date2Str.length() != 8) {
       output.set(-2);
       return output;
