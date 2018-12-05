@@ -28,7 +28,10 @@ import org.apache.hadoop.hive.ql.udf.UDFType;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.BooleanObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.DateObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.DoubleObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.HiveCharObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.HiveDecimalObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.HiveVarcharObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.IntObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.LongObjectInspector;
@@ -83,36 +86,41 @@ public class Udf extends GenericUDF {
    */
   @Override
   public Object evaluate(DeferredObject[] arguments) throws HiveException {
-    if (exec == null) {
-      initExec(arguments);
-    }
-    if (arguments.length > 1) {
-      setParameters(arguments);
-    }
+    try {
+      if (exec == null) {
+        initExec(arguments);
+      }
+      if (arguments.length > 1) {
+        setParameters(arguments);
+      }
 
-    String query = queryOI.getPrimitiveJavaObject(arguments[0].get());
-    if (query.toLowerCase().startsWith(FN_GET_STA_CODE + "(")) {
-      return evaluateFnGetStaCode(arguments);
-    }
-    if (query.toLowerCase().startsWith(FN_DAY_TO_RMB + "(")) {
-      return evaluateFnDayToRmb(arguments);
-    }
-    if (query.toLowerCase().startsWith(FN_GET_TO_RMB_RATE + "(")) {
-      return evaluateFnGetToRmbRate(arguments);
-    }
-    if (query.toLowerCase().startsWith(FN_R01_TO_USD + "(")) {
-      return evaluateFnR01ToUsd(arguments);
-    }
-    if (query.toLowerCase().startsWith(GET_CODE_SPLIT + "(")) {
-      return evaluateGetCodeSplit(arguments);
-    }
-    if (query.toLowerCase().startsWith(GET_USD_EXCHANGE_RATE + "(")) {
-      return evaluateGetUsdExchangeRate(arguments);
-    }
+      String query = queryOI.getPrimitiveJavaObject(arguments[0].get());
+      if (query.toLowerCase().startsWith(FN_GET_STA_CODE + "(")) {
+        return evaluateFnGetStaCode(arguments);
+      }
+      if (query.toLowerCase().startsWith(FN_DAY_TO_RMB + "(")) {
+        return evaluateFnDayToRmb(arguments);
+      }
+      if (query.toLowerCase().startsWith(FN_GET_TO_RMB_RATE + "(")) {
+        return evaluateFnGetToRmbRate(arguments);
+      }
+      if (query.toLowerCase().startsWith(FN_R01_TO_USD + "(")) {
+        return evaluateFnR01ToUsd(arguments);
+      }
+      if (query.toLowerCase().startsWith(GET_CODE_SPLIT + "(")) {
+        return evaluateGetCodeSplit(arguments);
+      }
+      if (query.toLowerCase().startsWith(GET_USD_EXCHANGE_RATE + "(")) {
+        return evaluateGetUsdExchangeRate(arguments);
+      }
 
-    Var result = exec.run();
-    if (result != null) {
-      return result.toString();
+      Var result = exec.run();
+      if (result != null) {
+        return result.toString();
+      }
+    } catch (Exception e) {
+      exec = null;
+      throw new HiveException(e.getMessage());
     }
     return null;
   }
@@ -232,12 +240,30 @@ public class Udf extends GenericUDF {
    */
   void setParameters(DeferredObject[] arguments) throws HiveException {
     for (int i = 1; i < arguments.length; i++) {
-      String name = ":" + i;      
+      String name = ":" + i;
+
+      if (arguments[i] == null) {
+        exec.setVariableToNull(name);
+        continue;
+      }
+
       if (argumentsOI[i] instanceof StringObjectInspector) {
         String value = ((StringObjectInspector)argumentsOI[i]).getPrimitiveJavaObject(arguments[i].get());
         if (value != null) {
           exec.setVariable(name, value);
         }        
+      }
+      else if (argumentsOI[i] instanceof HiveVarcharObjectInspector) {
+        String value = ((HiveVarcharObjectInspector)argumentsOI[i]).getPrimitiveJavaObject(arguments[i].get()).getValue();
+        if (value != null) {
+          exec.setVariable(name, value);
+        }
+      }
+      else if (argumentsOI[i] instanceof HiveCharObjectInspector) {
+        String value = ((HiveCharObjectInspector)argumentsOI[i]).getPrimitiveJavaObject(arguments[i].get()).getValue();
+        if (value != null) {
+          exec.setVariable(name, value);
+        }
       }
       else if (argumentsOI[i] instanceof IntObjectInspector) {
         Integer value = (Integer)((IntObjectInspector)argumentsOI[i]).getPrimitiveJavaObject(arguments[i].get());
@@ -261,6 +287,12 @@ public class Udf extends GenericUDF {
         HiveDecimal value = ((HiveDecimalObjectInspector)argumentsOI[i]).getPrimitiveJavaObject(arguments[i].get());
         if (value != null) {
           exec.setVariable(name, new Var(value.bigDecimalValue()));
+        }
+      }
+      else if (argumentsOI[i] instanceof DoubleObjectInspector) {
+        Double value = (Double) ((DoubleObjectInspector)argumentsOI[i]).getPrimitiveJavaObject(arguments[i].get());
+        if (value != null) {
+          exec.setVariable(name, new Var(value));
         }
       }
       else if (argumentsOI[i] instanceof DateObjectInspector) {
