@@ -61,6 +61,7 @@
     <module>testutils</module>
     <module>packaging</module>
     <module>standalone-metastore</module>
+      <module>hive-hplsql-bloodfigure</module>
   </modules>
 
   <properties>
