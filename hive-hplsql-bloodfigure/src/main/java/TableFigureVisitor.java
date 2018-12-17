@@ -31,22 +31,35 @@ public class TableFigureVisitor extends HplsqlBaseVisitor {
      */
     private void saveResult() {
         //存影响表的 set 非空时候，遍历 set 保存影响表名和存储过程名
-        if (!set.isEmpty()) {
-        for (String str : set) {
-            if (!str.contains("SESSION.") && !value.contains(str + procName)) {
-                insertRelationsSet(str, procName);
+        if (procName != null) {
+            if (!set.isEmpty()) {
+                for (String str : set) {
+                    if (!str.contains("SESSION.") && !value.contains(str + procName) && !tableName.equals(str)) {
+                        insertRelationsSet(str, procName);
+                    }
+                }
+            }
+            //目标表非null时候，保存存储过程名和目标表名
+            if (tableName != null && !tableName.contains("SESSION.") && !tableName.contains("ETL_ERRLOG_INFO")
+                    && !value.contains(procName + tableName) && !tableName.contains("ETL.PROCLOG")) {
+                insertRelationsSet(procName, tableName);
+                //set 清空
+                set.clear();
+            }
+        }else {
+            if (!set.isEmpty()) {
+                for (String str : set) {
+                    if (!str.contains("SESSION.") && !value.contains(str + tableName) &&tableName != null
+                            && !tableName.contains("SESSION.") && !tableName.contains("ETL_ERRLOG_INFO")
+                            && !tableName.contains("ETL.PROCLOG") && !tableName.equals(str)) {
+                        insertRelationsSet(str, tableName);
+                    }
+                }
             }
         }
-        }
-        //目标表非null时候，保存存储过程名和目标表名
-        if (tableName != null && !tableName.contains("SESSION.") && !tableName.contains("ETL_ERRLOG_INFO")
-                && !value.contains(procName + tableName) && !tableName.contains("ETL.PROCLOG")) {
-            insertRelationsSet(procName, tableName);
-            //set 清空
-            set.clear();
-        }
+        //set 清空
+        set.clear();
     }
-
 //    /*
 //        处理过程函数,格式定义为dot语言
 //     */

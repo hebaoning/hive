@@ -1,0 +1,2 @@
+insert into a select * from b,c;
+insert into t1 select * from t2 left join t3 on 1=1 union select * from t4;
