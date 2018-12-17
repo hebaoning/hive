@@ -136,7 +136,7 @@ public class Conf extends Configuration {
   /**
    * Set whether convert or not SQL for the specified connection profile
    */
-  void setConnectionConvert(String name, String value) {
+  public void setConnectionConvert(String name, String value) {
     boolean convert = false;
     if (value.compareToIgnoreCase(TRUE) == 0 || value.compareToIgnoreCase(YES) == 0) {
       convert = true;

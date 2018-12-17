@@ -28,9 +28,11 @@ import java.io.IOException;
  */
 public class StreamGobbler extends Thread {
   InputStream is;
-  
-  StreamGobbler(InputStream is) {
+  Exec exec;
+
+  StreamGobbler(InputStream is, Exec exec) {
     this.is = is;
+    this.exec = exec;
   }
   
   public void run() {
@@ -43,6 +45,7 @@ public class StreamGobbler extends Thread {
           break;
         }        
         System.out.println(line);
+        exec.outputPrintln(line);
       }
     } catch (IOException ioe) {
       ioe.printStackTrace();  

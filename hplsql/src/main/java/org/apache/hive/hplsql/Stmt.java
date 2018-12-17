@@ -387,10 +387,13 @@ public class Stmt {
           for (int i = 1; i <= cols; i++) {
             if (i > 1) {
               System.out.print("\t");
+              exec.outputPrint("\t");
             }
             System.out.print(rs.getString(i));
+            exec.outputPrint(rs.getString(i));
           }
           System.out.println("");
+          exec.outputPrintln("");
         }
       }
     }    
@@ -1194,10 +1197,13 @@ public class Stmt {
             for(int i = 1; i <= cols; i++) {
               if(i > 1) {
                 System.out.print("\t");
+                exec.outputPrint("\t");
               }
               System.out.print(rs.getString(i));
+              exec.outputPrint(rs.getString(i));
             }
             System.out.println("");
+            exec.outputPrintln("");
           }
         }
       } 
@@ -1415,6 +1421,7 @@ public class Stmt {
     trace(ctx, "PRINT");
     if (ctx.expr() != null) {
       System.out.println(evalPop(ctx.expr()).toString());
+      exec.outputPrintln(evalPop(ctx.expr()).toString());
     }
 	  return 0; 
   }
@@ -1540,6 +1547,7 @@ public class Stmt {
       ResultSet rs = query.getResultSet();
       if (rs != null) {
         System.out.print("\n");
+        exec.outputPrint("\n");
         // The summary query returns only one row        
         if (rs.next()) {
           int i = 0, cc = 11;
@@ -1548,7 +1556,9 @@ public class Stmt {
           String fmt = String.format("%%-%ds\t%%-11s\t%%-11s\t%%-11s\t%%-11s\t%%-11s\t%%-11s\t%%-11s\t%%-11s" +
               "\t%%-11s\t%%-11s\t%%-11s\t%%-11s\t%%-11s\n", maxColName + 1);
           System.out.print(String.format(fmt, "Column", "Type", "Rows", "NonNull", "Unique", "Avg", 
-              "Min", "Max", "StdDev", "p05", "p25", "p50", "p75", "p95"));          
+              "Min", "Max", "StdDev", "p05", "p25", "p50", "p75", "p95"));
+          exec.outputPrint(String.format(fmt, "Column", "Type", "Rows", "NonNull", "Unique", "Avg",
+                  "Min", "Max", "StdDev", "p05", "p25", "p50", "p75", "p95"));
           for(Column c : row.getColumns()) {
             String avg = String.format("%.2f", rs.getDouble(4 + i*cc));
             if (rs.wasNull())
@@ -1574,6 +1584,9 @@ public class Stmt {
             System.out.print(String.format(fmt, c.getName(), c.getType(), cntRows, rs.getString(2 + i*cc),
                 rs.getString(3 + i*cc), avg, rs.getString(5 + i*cc), rs.getString(6 + i*cc),
                 stddev, p05, p25, p50, p75, p95));
+            exec.outputPrint(String.format(fmt, c.getName(), c.getType(), cntRows, rs.getString(2 + i*cc),
+                    rs.getString(3 + i*cc), avg, rs.getString(5 + i*cc), rs.getString(6 + i*cc),
+                    stddev, p05, p25, p50, p75, p95));
             i++;
           }
         }
@@ -1694,35 +1707,44 @@ public class Stmt {
           outLens.add(maxLen);
         }        
         System.out.print("\n");
+        exec.outputPrint("\n");
         // Output header
         i = 0;
         for(Column c : row.getColumns()) {
           if (i != 0) {
             System.out.print("\t");
+            exec.outputPrint("\t");
           }
           String fmt = String.format("%%-%ds", outLens.get(i) + 11 + 3);
           System.out.print(String.format(fmt, c.getName()));
+          exec.outputPrint(String.format(fmt, c.getName()));
           i++;
         }
         System.out.print("\n");
+        exec.outputPrint("\n");
         // Output top values
         for (int j = 0; j < topNum; j++) {
           for(int k = 0; k < row.size(); k++) {
             if (k != 0) {
               System.out.print("\t");
+              exec.outputPrint("\t");
             }
             int cnt = outCnts.get(j + k * topNum);
             if (cnt != 0) { // skip padded values
               String fmt = String.format("%%-%ds", outLens.get(k));
               System.out.print(String.format(fmt, outCols.get(j + k * topNum)));
+              exec.outputPrint(String.format(fmt, outCols.get(j + k * topNum)));
               System.out.print(String.format("   %-11d", cnt));
+              exec.outputPrint(String.format("   %-11d", cnt));
             }
             else {
               String fmt = String.format("%%-%ds", outLens.get(k) + 11 + 3);
               System.out.print(String.format(fmt, ""));
+              exec.outputPrint(String.format(fmt, ""));
             }
           }
           System.out.print("\n");
+          exec.outputPrint("\n");
         }
       }
     }

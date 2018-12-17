@@ -257,7 +257,17 @@ public class Conn {
     connStrings.put(name, connStr);
     connTypes.put(name, getType(connStr));
   }
-  
+
+  /**
+   * Add a new connection
+   */
+  public void addConnection(String name, Connection connection) {
+    if(connections.get(name) == null){
+      connections.put(name, new Stack<Connection>());
+    }
+    connections.get(name).add(connection);
+  }
+
   /**
    * Add initialization statements for the specified connection
    */

@@ -18,11 +18,8 @@
  
 package org.apache.hive.hplsql;
 
+import java.io.*;
 import java.math.BigDecimal;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -124,6 +121,9 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   boolean info = true;
   boolean offline = false;
   boolean outputAst = false;
+  Connection reusedConnection = null;
+  boolean serverMode = false;
+  public PrintStream output;
 
   Exec() {
     exec = this;
@@ -131,6 +131,13 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   
   Exec(Exec exec) {
     this.exec = exec;
+  }
+
+  public Exec(Connection reusedConnection, PrintStream out) {
+    exec = this;
+    this.reusedConnection = reusedConnection;
+    this.output = out;
+    this.serverMode = true;
   }
 
   public HplsqlParser.Create_procedure_stmtContext getProcedure(String name) {
@@ -771,9 +778,15 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     Var result = run();
     if (result != null) {
       System.out.println(result.toString());
+      outputPrintln(result.toString());
     }
     leaveScope();
     cleanup();
+    if(serverMode){
+      throwsExceptions();
+    }else{
+      printExceptions();
+    }
     printExceptions();    
     return getProgramReturnCode();
   }
@@ -814,7 +827,10 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     conn = new Conn(this);
     meta = new Meta(this);
     initOptions();
-    
+    if(reusedConnection != null){
+      conn.addConnection(conf.defaultConnection, reusedConnection);
+    }
+
     expr = new Expression(this);
     select = new Select(this);
     stmt = new Stmt(this);
@@ -1009,8 +1025,21 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
         System.err.println(sig.value);
       }
     }
-  } 
-  
+  }
+
+  /**
+   * throws unhandled exceptions
+   * @throws Exception
+   */
+  void throwsExceptions() throws Exception{
+    if (!signals.empty()) {
+      Signal sig = signals.pop();
+      if (sig.exception != null) {
+        throw sig.exception;
+      }
+    }
+  }
+
   /**
    * Get the program return code
    */
@@ -1056,6 +1085,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     Var prev = stackPop();
     if (prev != null && prev.value != null) {
       System.out.println(prev.toString());
+      outputPrintln(prev.toString());
     }
     return visitChildren(ctx); 
   }
@@ -2159,8 +2189,8 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
       }     
       if (!offline) {
         Process p = Runtime.getRuntime().exec(cmdarr);      
-        new StreamGobbler(p.getInputStream()).start();
-        new StreamGobbler(p.getErrorStream()).start(); 
+        new StreamGobbler(p.getInputStream(), exec).start();
+        new StreamGobbler(p.getErrorStream(), exec).start();
         int rc = p.waitFor();      
         if (trace) {
           trace(ctx, "HIVE Process exit code: " + rc);      
@@ -2219,8 +2249,8 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
         trace(ctx, "HOST Command: " + cmd);      
       } 
       Process p = Runtime.getRuntime().exec(cmd);      
-      new StreamGobbler(p.getInputStream()).start();
-      new StreamGobbler(p.getErrorStream()).start(); 
+      new StreamGobbler(p.getInputStream(), exec).start();
+      new StreamGobbler(p.getErrorStream(), exec).start();
       int rc = p.waitFor();      
       if (trace) {
         trace(ctx, "HOST Process exit code: " + rc);      
@@ -2783,9 +2813,11 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
 	  }
 		if (ctx != null) {
 	    System.out.println(Thread.currentThread().getId() + " Ln:" + ctx.getStart().getLine() + " " + message);
+	    outputPrintln(Thread.currentThread().getId() + " Ln:" + ctx.getStart().getLine() + " " + message);
 		}
 		else {
 		  System.out.println(Thread.currentThread().getId() + " " + message);
+          outputPrintln(Thread.currentThread().getId() + " " + message);
 		}
   }
   
@@ -2834,6 +2866,24 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
       System.err.println(message);
     }
   }
+
+  /**
+   * use output to print msg
+   */
+  public void outputPrint(String msg){
+    if(output != null){
+      output.print(msg);
+    }
+  }
+
+  /**
+   * use output to println msg
+   */
+  public void outputPrintln(String msg){
+    if(output != null){
+      output.println(msg);
+    }
+  }
   
   public Stack<Var> getStack() {
     return exec.stack;
@@ -2862,4 +2912,5 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   public boolean getOffline() {
     return exec.offline;
   }
+
 } 

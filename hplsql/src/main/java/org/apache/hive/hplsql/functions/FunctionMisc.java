@@ -385,6 +385,7 @@ public class FunctionMisc extends Function {
     else {
       for (Map.Entry<String, Integer> i : group.entrySet()) {
         System.out.println(i.getKey() + '\t' + i.getValue());
+        exec.outputPrintln(i.getKey() + '\t' + i.getValue());
       }
     }
     exec.closeQuery(query, exec.conf.defaultConnection);
