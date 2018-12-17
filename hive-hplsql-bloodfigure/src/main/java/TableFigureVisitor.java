@@ -30,14 +30,19 @@ public class TableFigureVisitor extends HplsqlBaseVisitor {
      * 存放结果, 在 visitInsert_stmt， visitMerge_stmt 方法中会被调用
      */
     private void saveResult() {
+        //存影响表的 set 非空时候，遍历 set 保存影响表名和存储过程名
+        if (!set.isEmpty()) {
         for (String str : set) {
-            if (!set.isEmpty() && !str.contains("SESSION.") && !value.contains(str + procName)) {
+            if (!str.contains("SESSION.") && !value.contains(str + procName)) {
                 insertRelationsSet(str, procName);
             }
         }
+        }
+        //目标表非null时候，保存存储过程名和目标表名
         if (tableName != null && !tableName.contains("SESSION.") && !tableName.contains("ETL_ERRLOG_INFO")
                 && !value.contains(procName + tableName) && !tableName.contains("ETL.PROCLOG")) {
             insertRelationsSet(procName, tableName);
+            //set 清空
             set.clear();
         }
     }
@@ -81,8 +86,13 @@ public class TableFigureVisitor extends HplsqlBaseVisitor {
     @Override
     public Object visitInsert_stmt(HplsqlParser.Insert_stmtContext ctx) {
         tableName = ctx.table_name().getText().toUpperCase();
+        //先保存一次结果
         saveResult();
-        return visitChildren(ctx);
+        //返回执行对象，否则会退出遍历
+        Object ctx2= visitChildren(ctx);
+        //遍历之后再保存一次结果
+        saveResult();
+        return ctx2;
     }
 
     /**
@@ -93,8 +103,8 @@ public class TableFigureVisitor extends HplsqlBaseVisitor {
      */
     @Override
     public Object visitFrom_table_name_clause(HplsqlParser.From_table_name_clauseContext ctx) {
-        tableName = ctx.table_name().ident().getText().toUpperCase();
-        set.add(tableName);
+        String fromTableName = ctx.table_name().ident().getText().toUpperCase();
+        set.add(fromTableName);
         return visitChildren(ctx);
     }
 
@@ -120,7 +130,9 @@ public class TableFigureVisitor extends HplsqlBaseVisitor {
     public Object visitMerge_stmt(HplsqlParser.Merge_stmtContext ctx) {
         tableName = ctx.merge_table(0).table_name().ident().getText().toUpperCase();
         saveResult();
-        return visitChildren(ctx);
+        Object ctx2= visitChildren(ctx);
+        saveResult();
+        return ctx2;
     }
 
     /**
@@ -131,12 +143,13 @@ public class TableFigureVisitor extends HplsqlBaseVisitor {
      */
     @Override
     public Object visitCreate_view_stmt(HplsqlParser.Create_view_stmtContext ctx) {
-        tableName = ctx.ident().getText().toUpperCase();
-        for (String str : set) {
-            insertRelationsSet(str, tableName);
+        String viewName = ctx.ident().getText().toUpperCase();
+        Object ctx2=visitChildren(ctx);
+        for (String tableName : set) {
+            insertRelationsSet(tableName, viewName);
         }
         set.clear();
-        return visitChildren(ctx);
+        return ctx2;
     }
 
     /**
