@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class TableFigureTest {
+public class BloodFigure {
 
     public static void main(String[] args) throws IOException {
         //指定目录
-        String fileDir =  "/Users/jianjie/Desktop/test类/";
+        String fileDir = "/Users/jianjie/Desktop/test类/";
 
         List<String> fileList = GetFileList.getFileList(fileDir);
         List<Relation> list = new ArrayList<>();
@@ -21,17 +21,17 @@ public class TableFigureTest {
 
         for (int i = 0; i < fileList.size(); i++) {
 
-            String inputFile=fileList.get(i);
-            if(args.length>0) {
+            String inputFile = fileList.get(i);
+            if (args.length > 0) {
                 inputFile = args[0];
             }
             InputStream is = System.in;
-            if(inputFile !=null) {
-                is= new FileInputStream(inputFile);
+            if (inputFile != null) {
+                is = new FileInputStream(inputFile);
             }
 
             ANTLRInputStream input = new ANTLRInputStream(is);
-            HplsqlLexer lexer = new HplsqlLexer( input);
+            HplsqlLexer lexer = new HplsqlLexer(input);
             CommonTokenStream tokenStream = new CommonTokenStream(lexer);
             HplsqlParser parser = new HplsqlParser(tokenStream);
             ParseTree tree = parser.program();
@@ -40,18 +40,14 @@ public class TableFigureTest {
             visitor.visit(tree);
             Set<Relation> relationSet = visitor.getRelationSet();
             for (Relation relation : relationSet
-                 ) {
+            ) {
                 list.add(relation);
             }
         }
 
-        String[] columnNames = { "From", "To"};
+        String[] columnNames = {"From", "To"};
         //按指定的Excel版本，文件路径进行输出
         util.exportExcel("存储依赖", columnNames, list, new FileOutputStream("/Users/jianjie/Desktop/test/test3.xls"), ExportExcelUtil.EXCEl_FILE_2007);
-
-
-
-
 
 
 //        /*
@@ -74,9 +70,9 @@ public class TableFigureTest {
 //            }
 //
 //            ANTLRInputStream input = new ANTLRInputStream(is);
-//            HplsqlLexer lexer = new HplsqlLexer( input);
+//            Antlr4.HplsqlLexer lexer = new Antlr4.HplsqlLexer( input);
 //            CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-//            HplsqlParser parser = new HplsqlParser(tokenStream);
+//            Antlr4.HplsqlParser parser = new Antlr4.HplsqlParser(tokenStream);
 //
 //            ParseTree tree = parser.program();
 //            TableFigureVisitor visitor = new TableFigureVisitor();          //自定义visitor遍历

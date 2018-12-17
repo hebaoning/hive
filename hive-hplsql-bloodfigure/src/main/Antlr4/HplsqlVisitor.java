@@ -1,4 +1,4 @@
-// Generated from /Users/jianjie/Desktop/Demo_Insert/src/main/Antlr4/Hplsql.g4 by ANTLR 4.7
+// Generated from /Users/jianjie/Desktop/jianjiejin/hive/hive-hplsql-bloodfigure/src/main/Antlr4/Hplsql.g4 by ANTLR 4.7
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
