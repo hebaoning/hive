@@ -1,5 +1,6 @@
 package org.apache.hive.hplsql.service.operation;
 
+import org.apache.hive.hplsql.File;
 import org.apache.hive.hplsql.service.common.HplsqlResponse;
 import org.apache.hive.hplsql.service.common.exception.HplsqlException;
 import org.apache.hive.hplsql.service.session.HplsqlSession;
@@ -68,12 +69,12 @@ public class ExecuteStatementOperation extends Operation {
                 return;
             }
             LOG.info(executor + " start execute " + statement);
-            response = executor.runHpl(statement);
+            response = executor.runHpl(statement, getHandle(), saveResultToFile);
             LOG.info(executor + " execute {} finished", statement);
             if (0 != response.getResponseCode()) {
                 throw new HplsqlException("Error while processing statement");
             }
-            operationResult = new OperationResult(response.getResultBytes());
+            operationResult = saveResultToFile ? new OperationResult(response.getFile()) : new OperationResult(response.getResultBytes());
         } catch (Throwable e) {
             if ((getStatus().getState() == OperationState.CANCELED) || (getStatus().getState() == OperationState.CLOSED) || (
                     getStatus().getState() == OperationState.FINISHED)) {
@@ -148,7 +149,7 @@ public class ExecuteStatementOperation extends Operation {
     public void close() throws HplsqlException {
         cancelExecuteTask();
         setState(OperationState.CLOSED);
-        //TODO 清除执行结果
+        operationResult.close();
     }
 
     private void cancelExecuteTask(){

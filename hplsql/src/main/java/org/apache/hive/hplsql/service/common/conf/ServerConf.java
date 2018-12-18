@@ -15,7 +15,12 @@ public class ServerConf{
      * 异步sql执行操作获取结果的轮询时间(ms)
      * 时间过长会阻碍其他请求获取执行结果
      */
-    public static final Long OPERATION_STATUS_POLLING_TIMEOUT = 1000L;
+    public static final long OPERATION_STATUS_POLLING_TIMEOUT = 1000L;
+    /**
+     * 是否将hpl执行结果保存在文件
+     */
+    public static final boolean SAVE_RESULTS_TO_FILE = false;
+    public static final String RESULTS_FILE_DIR = "hplResults/";
     public static final String DEFAULT_CONN_DRIVER = "org.apache.hadoop.hive.jdbc.HiveDriver";
     private Conf hplsqlConf;
     private final Map<String, ArrayList<String>> connInits = new ConcurrentHashMap<>();

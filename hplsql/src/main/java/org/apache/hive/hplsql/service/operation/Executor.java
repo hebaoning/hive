@@ -1,16 +1,18 @@
 package org.apache.hive.hplsql.service.operation;
 
+import org.apache.commons.collections.bag.SynchronizedSortedBag;
+import org.apache.commons.io.FileUtils;
 import org.apache.hive.hplsql.Exec;
 import org.apache.hive.hplsql.service.common.HplsqlResponse;
 import org.apache.hive.hplsql.service.common.conf.ServerConf;
 import org.apache.hive.hplsql.service.common.exception.HplsqlException;
+import org.apache.hive.hplsql.service.common.handle.OperationHandle;
 import org.apache.hive.service.rpc.thrift.TGetInfoType;
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -30,22 +32,37 @@ public class Executor {
         reuseConnection = openConnection();
     }
 
-    public synchronized HplsqlResponse runHpl(String statement) throws Exception {
+    public synchronized HplsqlResponse runHpl(String statement, OperationHandle operationHandle , boolean saveResultToFile) throws Exception {
         checkConnection();
-
-        //hplsql执行结果会输出到不同的out对象，防止不同线程执行时都将结果打印到标准输出，造成结果数据交叉
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PrintStream printOut = new PrintStream(out);
+        OutputStream outputStream;
+        File file = null;
+        HplsqlResponse response;
+        if(saveResultToFile){
+            file = new File(Executor.class.getClassLoader().getResource("").getPath()
+                    + ServerConf.RESULTS_FILE_DIR + operationHandle.getHandleIdentifier() + ".txt");
+            if(file.getParentFile() != null){
+                file.getParentFile().mkdirs();
+            }
+            file.createNewFile();
+            outputStream = new FileOutputStream(file);
+        } else{
+            outputStream = new ByteArrayOutputStream();
+        }
+        //hplsql执行结果会输出到不同文件，防止不同线程执行时都将结果打印到标准输出，造成结果数据交叉
+        PrintWriter printWriter = new PrintWriter(outputStream);
         String[] args = {"-e",  statement};
-        //hplsql 不一定使用默认连接conf.defaultConnection
-        Exec exec = new Exec(reuseConnection, printOut);
-        int responseCode = exec.run(args);
-
-        LOG.info("~~~~~out~~~~~:\n" + out.toString());
-        HplsqlResponse response = new HplsqlResponse(responseCode);
-        response.setResultBytes(out.toByteArray());
-        printOut.close();
+        int responseCode = excuteHplCmd(args,printWriter);
+        printWriter.flush(); //将缓冲区的数据写出到底层输出流中
+        response = saveResultToFile ? new HplsqlResponse(responseCode, file)
+                : new HplsqlResponse(responseCode, ((ByteArrayOutputStream) outputStream).toByteArray());
+        printWriter.close();
         return response;
+    }
+
+    private int excuteHplCmd(String[] args, PrintWriter printWriter) throws Exception{
+        //hplsql 不一定使用默认连接conf.defaultConnection
+        Exec exec = new Exec(reuseConnection, printWriter);
+        return exec.run(args);
     }
 
     //目前不会并发执行该方法，synchronized是保证只有一个线程使用connection对象

@@ -416,7 +416,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TFetchResultsResp FetchResults(TFetchResultsReq req) throws TException {
-        LOG.info("-------FetchResults--------- operationHandle:" + req.getOperationHandle());
+        LOG.info("-------FetchResults--------- operationHandle:" + req.getOperationHandle().getOperationId());
         TFetchResultsResp resp = new TFetchResultsResp();
         try {
             RowSet rowSet = cliService.fetchResults(

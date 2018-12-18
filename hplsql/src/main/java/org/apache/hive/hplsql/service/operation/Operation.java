@@ -1,5 +1,6 @@
 package org.apache.hive.hplsql.service.operation;
 
+import org.apache.hive.hplsql.service.common.conf.ServerConf;
 import org.apache.hive.hplsql.service.common.exception.HplsqlException;
 import org.apache.hive.hplsql.service.common.handle.OperationHandle;
 import org.apache.hive.hplsql.service.session.HplsqlSession;
@@ -20,6 +21,7 @@ public abstract class Operation {
     protected final HplsqlSession parentSession;
     private final OperationHandle opHandle;
     private volatile OperationState state = OperationState.INITIALIZED;
+    protected boolean saveResultToFile = ServerConf.SAVE_RESULTS_TO_FILE;
     protected boolean hasResultSet;
     protected volatile HplsqlException operationException;
     protected volatile Future<?> backgroundHandle;

@@ -123,7 +123,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   boolean outputAst = false;
   Connection reusedConnection = null;
   boolean serverMode = false;
-  public PrintStream output;
+  public PrintWriter printWriter;
 
   Exec() {
     exec = this;
@@ -133,10 +133,10 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
     this.exec = exec;
   }
 
-  public Exec(Connection reusedConnection, PrintStream out) {
+  public Exec(Connection reusedConnection, PrintWriter printWriter) {
     exec = this;
     this.reusedConnection = reusedConnection;
-    this.output = out;
+    this.printWriter = printWriter;
     this.serverMode = true;
   }
 
@@ -2871,8 +2871,8 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
    * use output to print msg
    */
   public void outputPrint(String msg){
-    if(output != null){
-      output.print(msg);
+    if(printWriter != null){
+      printWriter.print(msg);
     }
   }
 
@@ -2880,8 +2880,8 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
    * use output to println msg
    */
   public void outputPrintln(String msg){
-    if(output != null){
-      output.println(msg);
+    if(printWriter != null){
+      printWriter.println(msg);
     }
   }
   
