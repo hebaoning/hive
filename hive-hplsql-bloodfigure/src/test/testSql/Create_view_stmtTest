@@ -1,5 +1,0 @@
-create or replace view view_test as
-select * from a left join b on 1=1 union select * from c;
-CREATE OR REPLACE VIEW V_2
-AS
-select * from tb1,tb2;

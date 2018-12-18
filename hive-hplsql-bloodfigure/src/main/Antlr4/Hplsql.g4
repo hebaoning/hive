@@ -106,7 +106,7 @@ stmt :
      ;
 
 create_view_stmt:
-      (T_CREATE T_OR T_REPLACE) T_VIEW ident T_AS select_stmt from_clause where_clause?  group_by_clause?
+      (T_CREATE T_OR? T_REPLACE?) T_VIEW ident T_AS select_stmt from_clause where_clause?  group_by_clause?
      ;
 
 
