@@ -929,10 +929,10 @@ update_upsert :
 merge_stmt :                              // MERGE statement
        T_MERGE T_INTO merge_table T_USING merge_table T_ON bool_expr merge_condition+
      ;
-     
+
 merge_table :
        (table_name | (T_OPEN_P select_stmt T_CLOSE_P)) (T_AS? ident)?
-     ; 
+     ;
      
 merge_condition :
        T_WHEN T_NOT? T_MATCHED (T_AND bool_expr)? T_THEN merge_action

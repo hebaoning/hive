@@ -1,5 +1,4 @@
 import domain.Relation;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,94 +10,111 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     String procName = null;
     String viewName = null;
     //用于存放最终结果
-    Set<Relation> relationsSet = new HashSet<Relation>();
+    Set<Relation> resultSet = new HashSet<Relation>();
     //用于存放影响表,保存结果中使用，会清空
-    Set<String> set = new HashSet<>();
+    Set<String> tmpSet = new HashSet<>();
     // 用于结果去重
-    Set<String> value = new HashSet<>();
+    Set<String> addedSet = new HashSet<>();
 
     /**
-     * 将值传入 relationsSet 集合，作为最后结果的返回
+     * 判断是否是表名，过滤中间表，日志表
      */
-    public void insertRelationsSet(String name1, String name2) {
+    public boolean isTableName(String name) {
+        if (!name.contains("SESSION.") && !name.contains("ETL_ERRLOG_INFO")
+            && !name.contains("ETL.PROCLOG")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 将表之间关系，或表和存储过程关系存入 relation 对象
+     */
+    public void insertResultSet(String name1, String name2) {
         Relation relation = new Relation();
         relation.setFromTable(name1);
         relation.setToTable(name2);
-        relationsSet.add(relation);
-        value.add(name1 + name2);
+        resultSet.add(relation);
+        addedSet.add(name1 + name2);
     }
 
     /**
-     * 存放结果, 在 visitInsert_stmt， visitMerge_stmt 方法中会被调用
+     * 保存结果
      */
-    public void saveResult() {
-        //存影响表的 set 非空时候，遍历 set 保存影响表名和存储过程名
-        if (procName != null) {
-            if (!set.isEmpty()) {
-                for (String str : set) {
-                    if (!str.contains("SESSION.") && !value.contains(str + procName) && !tableName
-                        .equals(str)) {
-                        insertRelationsSet(str, procName);
+    public void saveResult(String tableName, Set<String> tmpSet) {
+        if (isTableName(tableName)) {
+            //判断是否获得存储过程名和影响表
+            if (!tmpSet.isEmpty()) {
+                if (procName != null) {
+                    //先保存存储过程和目标表的关系
+                    if (!addedSet.contains(procName + tableName)) {
+                        insertResultSet(procName, tableName);
+                        addedSet.add(procName + tableName);
                     }
-                }
-            }
-            //目标表非null时候，保存存储过程名和目标表名
-            if (tableName != null && !tableName.contains("SESSION.") && !tableName
-                .contains("ETL_ERRLOG_INFO")
-                && !value.contains(procName + tableName) && !tableName.contains("ETL.PROCLOG")) {
-                insertRelationsSet(procName, tableName);
-                //set 清空
-                set.clear();
-            }
-        } else {
-            if (!set.isEmpty()) {
-                for (String str : set) {
-                    if (!str.contains("SESSION.") && !value.contains(str + tableName)
-                        && tableName != null
-                        && !tableName.contains("SESSION.") && !tableName.contains("ETL_ERRLOG_INFO")
-                        && !tableName.contains("ETL.PROCLOG") && !tableName.equals(str)) {
-                        insertRelationsSet(str, tableName);
+                    //再保存影响表和存储过程的关系
+                    for (String fromTableName : tmpSet
+                    ) {
+                        if (!addedSet.contains(fromTableName + procName)) {
+                            insertResultSet(fromTableName, procName);
+                            addedSet.add(fromTableName + procName);
+                        }
                     }
+                    //保存后，清空 tmpSet
+                    tmpSet.clear();
+                } else {
+                    //不存在存储过程名
+
+                    for (String fromTableName : tmpSet) {
+                        if (!addedSet.contains(fromTableName + tableName)) {
+                            insertResultSet(fromTableName, tableName);
+                            addedSet.add(fromTableName + tableName);
+                        }
+
+                    }
+                    tmpSet.clear();
                 }
             }
         }
-        //set 清空
-        set.clear();
     }
 
 
     /**
-     * 进入insert_stmt，获取目标表
+     *
+     * @param ctx
+     * @return
      */
     @Override
     public Object visitInsert_stmt(HplsqlParser.Insert_stmtContext ctx) {
         tableName = ctx.table_name().getText().toUpperCase();
-        if (!tableName.contains("SESSION.") && !tableName.contains("ETL_ERRLOG_INFO")
-            && !tableName.contains("ETL.PROCLOG")) {
-        }
         //先保存一次结果
-        saveResult();
+        saveResult(tableName, tmpSet);
         //返回执行对象，否则会退出遍历
         Object ctx2 = visitChildren(ctx);
         //遍历之后再保存一次结果
-        saveResult();
+        saveResult(tableName, tmpSet);
         return ctx2;
     }
 
     /**
-     * 获取影响表
+     *
+     * @param ctx
+     * @return
      */
     @Override
     public Object visitFrom_table_name_clause(HplsqlParser.From_table_name_clauseContext ctx) {
         fromTableName = ctx.table_name().ident().getText().toUpperCase();
-        set.add(fromTableName);
         if (!fromTableName.contains("SESSION.")) {
+            tmpSet.add(fromTableName);
         }
+
         return visitChildren(ctx);
     }
 
     /**
-     * 获取存储过程名
+     *
+     * @param ctx
+     * @return
      */
     @Override
     public Object visitCreate_procedure_stmt(HplsqlParser.Create_procedure_stmtContext ctx) {
@@ -107,40 +123,44 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     }
 
     /**
-     * 获取 mergeTableName
+     *
+     * @param ctx
+     * @return
      */
     @Override
     public Object visitMerge_stmt(HplsqlParser.Merge_stmtContext ctx) {
         tableName = ctx.merge_table(0).table_name().ident().getText().toUpperCase();
-        if (ctx.merge_table(1)!=null){
-            fromTableName = ctx.merge_table(1).table_name().ident().getText().toUpperCase();
-            set.add(fromTableName);
-        }
-        saveResult();
+        saveResult(tableName, tmpSet);
         Object ctx2 = visitChildren(ctx);
-        saveResult();
+        if (ctx.merge_table(1) != null && ctx.merge_table(1).select_stmt() == null) {
+            fromTableName = ctx.merge_table(1).table_name().ident().getText().toUpperCase();
+            tmpSet.add(fromTableName);
+        }
+        saveResult(tableName, tmpSet);
         return ctx2;
     }
 
     /**
-     * 获取视图表名,不需要调用 save() 函数，直接存入结果
+     * 获取视图表名，直接存入结果
      */
     @Override
     public Object visitCreate_view_stmt(HplsqlParser.Create_view_stmtContext ctx) {
         viewName = ctx.ident().getText().toUpperCase();
         Object ctx2 = visitChildren(ctx);
-        for (String tableName : set) {
-            insertRelationsSet(tableName, viewName);
+        for (String tableName : tmpSet) {
+            if (!addedSet.contains(tableName + viewName)) {
+                insertResultSet(tableName, viewName);
+            }
         }
-        set.clear();
+        tmpSet.clear();
         return ctx2;
     }
 
     /**
-     * 返回结果集合的方法
+     * 返回结果
      */
-    public Set<Relation> getRelationSet() {
-        return relationsSet;
+    public Set<Relation> getResultSet() {
+        return resultSet;
     }
 
 }

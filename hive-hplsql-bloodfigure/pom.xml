@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ANTILR4_DEMO</groupId>
-    <artifactId>Demo_Insert</artifactId>
+    <artifactId>blood-figure</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>

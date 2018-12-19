@@ -167,7 +167,7 @@ public class HplsqlParser extends Parser {
 		RULE_non_reserved_words = 226;
 	public static final String[] ruleNames = {
 		"program", "block", "begin_end_block", "single_block_stmt", "block_end", 
-		"proc_block", "stmt", "create_view_stmt.sql", "semicolon_stmt", "exception_block",
+		"proc_block", "stmt", "create_view_stmt", "semicolon_stmt", "exception_block", 
 		"exception_block_item", "null_stmt", "expr_stmt", "assignment_stmt", "assignment_stmt_item", 
 		"assignment_stmt_single_item", "assignment_stmt_multiple_item", "assignment_stmt_select_item", 
 		"allocate_cursor_stmt", "associate_locator_stmt", "begin_transaction_stmt", 
@@ -211,7 +211,7 @@ public class HplsqlParser extends Parser {
 		"from_table_values_row", "from_alias_clause", "table_name", "where_clause", 
 		"group_by_clause", "having_clause", "qualify_clause", "order_by_clause", 
 		"select_options", "select_options_item", "update_stmt", "update_assignment", 
-		"update_table", "update_upsert", "merge_stmt.sql", "merge_table", "merge_condition",
+		"update_table", "update_upsert", "merge_stmt", "merge_table", "merge_condition", 
 		"merge_action", "delete_stmt", "delete_alias", "describe_stmt", "bool_expr", 
 		"bool_expr_atom", "bool_expr_unary", "bool_expr_single_in", "bool_expr_multi_in", 
 		"bool_expr_binary", "bool_expr_logical_operator", "bool_expr_binary_operator", 

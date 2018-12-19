@@ -1,9 +1,13 @@
 import domain.Relation;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -24,13 +28,6 @@ import org.junit.jupiter.api.Test;
     String tmpFile = "/Users/jianjie/Desktop/jianjiejin/hive/hive-hplsql-bloodfigure/target/tmp/result.txt";
 
     @Test
-    public void testInsert_stmt() throws Exception {
-        String testFile = "insert_stmt";
-        run(testFile);
-
-    }
-
-    @Test
     public void testInsert_stmt1() throws Exception {
         String testFile = "insert_stmt1";
         run(testFile);
@@ -44,8 +41,20 @@ import org.junit.jupiter.api.Test;
     }
 
     @Test
+    public void testMerge_stmt2() throws Exception {
+        String testFile = "merge_stmt2";
+        run(testFile);
+    }
+
+    @Test
     public void testCreate_view_stmt() throws Exception {
         String testFile = "create_view_stmt";
+        run(testFile);
+    }
+
+    @Test
+    public void testProc_stmt() throws Exception {
+        String testFile = "proc_stmt";
         run(testFile);
     }
 
@@ -66,18 +75,26 @@ import org.junit.jupiter.api.Test;
         // 自定义visitor遍历
         FigureVisitor visitor = new FigureVisitor();
         visitor.visit(tree);
-        Set<Relation> relationSet = visitor.getRelationSet();
-
+        Set<Relation> relationSet = visitor.getResultSet();
+        //结果按首字母排序
+        List<String> sortList = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         for (Relation relation : relationSet
         ) {
-            sb.append(relation.getFromTable()).append(" ").append(relation.getToTable()).append("\n");
+            sortList.add(sb.append(relation.getFromTable()).append(" ").append(relation.getToTable()).append("\n").toString());
+            sb.delete(0,sb.length());
+        }
+        Collections.sort(sortList);
+        //将 sort 后的结果写入临时文件
+        for (String str: sortList) {
+            sb.append(str);
         }
         writeToFile(sb.toString());
-        String t = FileUtils.readFileToString(
-            new java.io.File("/Users/jianjie/Desktop/jianjiejin/hive/hive-hplsql-bloodfigure/src/test/sqlResult/" + testFile
-                + "_result.txt"), "utf-8").trim();
-
+        //预期结果,内容按首字母排序
+        File file = new File("/Users/jianjie/Desktop/jianjiejin/hive/hive-hplsql-bloodfigure/src/test/sqlResult/" + testFile
+            + "_result.txt");
+        String t = FileUtils.readFileToString(file, "utf-8").trim();
+        //结果比对
         Assert.assertEquals(t,sb.toString().trim());
 
     }

@@ -38,7 +38,7 @@ public class BloodFigure {
             // 自定义visitor遍历
             FigureVisitor visitor = new FigureVisitor();
             visitor.visit(tree);
-            Set<Relation> relationSet = visitor.getRelationSet();
+            Set<Relation> relationSet = visitor.getResultSet();
             for (Relation relation : relationSet
             ) {
                 list.add(relation);
