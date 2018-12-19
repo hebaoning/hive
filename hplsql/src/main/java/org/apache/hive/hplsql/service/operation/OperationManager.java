@@ -9,6 +9,8 @@ import org.apache.hive.service.cli.TableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -21,8 +23,8 @@ public class OperationManager {
             new ConcurrentHashMap<OperationHandle, Operation>();
     private ExecutorService backgroundOperationPool = Executors.newFixedThreadPool(5);
 
-    public ExecuteStatementOperation newExecuteStatementOperation(HplsqlSession parentSession,
-                                                                  String statement, Map<String, String> confOverlay, boolean runAsync) {
+    public ExecuteStatementOperation newExecuteStatementOperation(
+            HplsqlSession parentSession, String statement, Map<String, String> confOverlay, boolean runAsync) {
         ExecuteStatementOperation operation =
                 new ExecuteStatementOperation(parentSession, statement, confOverlay, runAsync);
         addOperation(operation);
@@ -31,6 +33,41 @@ public class OperationManager {
 
     public GetTypeInfoOperation newGetTypeInfoOperation(HplsqlSession parentSession) {
         GetTypeInfoOperation operation = new GetTypeInfoOperation(parentSession);
+        addOperation(operation);
+        return operation;
+    }
+
+    public GetCatalogsOperation newGetCatalogsOperation(HplsqlSession parentSession) {
+        GetCatalogsOperation operation = new GetCatalogsOperation(parentSession);
+        addOperation(operation);
+        return operation;
+    }
+
+    public GetSchemasOperation newGetSchemasOperation(HplsqlSession parentSession) {
+        GetSchemasOperation operation = new GetSchemasOperation(parentSession);
+        addOperation(operation);
+        return operation;
+    }
+
+    public GetTablesOperation newGetTablesOperation(HplsqlSession parentSession, String catalogName,
+                                                    String schemaName, String tableName, List<String> tableTypes) {
+        String[] types = tableTypes == null ? new String[]{} : (String[]) tableTypes.toArray();
+        GetTablesOperation operation = new GetTablesOperation(parentSession, catalogName, schemaName, tableName, types);
+        addOperation(operation);
+        return operation;
+    }
+
+    public GetColumnsOperation newGetColumnsOperation(HplsqlSession parentSession, String catalog, String schemaPattern,
+                                                  String tableNamePattern, String columnNamePattern) {
+        GetColumnsOperation operation = new GetColumnsOperation(
+                parentSession, catalog, schemaPattern, tableNamePattern, columnNamePattern);
+        addOperation(operation);
+        return operation;
+    }
+
+    public GetFunctionsOperarion newGetFunctionsOperarion(HplsqlSession parentSession,
+                                                          String catalog, String schemaPattern, String functionNamePattern) {
+        GetFunctionsOperarion operation = new GetFunctionsOperarion(parentSession, catalog, schemaPattern, functionNamePattern);
         addOperation(operation);
         return operation;
     }

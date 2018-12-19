@@ -196,14 +196,23 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      * 根据sessionhandle，找到session，调用session的获取目录方法
      * jdbc调用入口HiveDatabaseMetaData.getCatalogs()
      *
-     * @param tGetCatalogsReq -sessionHandle
+     * @param req -sessionHandle
      * @return
      * @throws TException
      */
     @Override
-    public TGetCatalogsResp GetCatalogs(TGetCatalogsReq tGetCatalogsReq) throws TException {
+    public TGetCatalogsResp GetCatalogs(TGetCatalogsReq req) throws TException {
         LOG.info("-------GetCatalogs---------");
-        return null;
+        TGetCatalogsResp resp = new TGetCatalogsResp();
+        try {
+            OperationHandle operationHandle = cliService.getCatalogs(new SessionHandle(req.getSessionHandle()));
+            resp.setOperationHandle(operationHandle.toTOperationHandle());
+            resp.setStatus(OK_STATUS);
+        } catch (Exception e) {
+            LOG.warn("Error getting catalogs: ", e);
+            resp.setStatus(HplsqlException.toTStatus(e));
+        }
+        return resp;
     }
 
 
@@ -211,14 +220,23 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      * 获取数据库信息
      * jdbc调用入口HiveDatabaseMetaData.getSchemas(String catalog, String schemaPattern)
      *
-     * @param tGetSchemasReq -sessionHandle catalogName schemaName
+     * @param req -sessionHandle catalogName schemaName
      * @return
      * @throws TException
      */
     @Override
-    public TGetSchemasResp GetSchemas(TGetSchemasReq tGetSchemasReq) throws TException {
+    public TGetSchemasResp GetSchemas(TGetSchemasReq req) throws TException {
         LOG.info("-------GetSchemas---------");
-        return null;
+        TGetSchemasResp resp = new TGetSchemasResp();
+        try {
+            OperationHandle opHandle = cliService.getSchemas(new SessionHandle(req.getSessionHandle()));
+            resp.setOperationHandle(opHandle.toTOperationHandle());
+            resp.setStatus(OK_STATUS);
+        } catch (Exception e) {
+            LOG.warn("Error getting schemas: ", e);
+            resp.setStatus(HiveSQLException.toTStatus(e));
+        }
+        return resp;
     }
 
     /**
@@ -226,14 +244,25 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      * jdbc调用入口HiveDatabaseMetaData.getTables(String catalog, String schemaPattern,
      * String tableNamePattern, String[] types)
      *
-     * @param tGetTablesReq -sessionHandle catalogName schemaName tableName tableTypes
+     * @param req -sessionHandle catalogName schemaName tableName tableTypes
      * @return
      * @throws TException
      */
     @Override
-    public TGetTablesResp GetTables(TGetTablesReq tGetTablesReq) throws TException {
+    public TGetTablesResp GetTables(TGetTablesReq req) throws TException {
         LOG.info("-------GetTables---------");
-        return null;
+        TGetTablesResp resp = new TGetTablesResp();
+        try {
+            OperationHandle opHandle = cliService.getTables(
+                    new SessionHandle(req.getSessionHandle()), req.getCatalogName(),
+                    req.getSchemaName(), req.getTableName(), req.getTableTypes());
+            resp.setOperationHandle(opHandle.toTOperationHandle());
+            resp.setStatus(OK_STATUS);
+        } catch (Exception e) {
+            LOG.warn("Error getting tables: ", e);
+            resp.setStatus(HplsqlException.toTStatus(e));
+        }
+        return resp;
     }
 
     /**
@@ -253,28 +282,49 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      * jdbc调用入口HiveDatabaseMetaData.getColumns(String catalog, String schemaPattern,
      * String tableNamePattern, String columnNamePattern)
      *
-     * @param tGetColumnsReq -sessionHandle catalogName schemaName tableName columnName
+     * @param req -sessionHandle catalogName schemaName tableName columnName
      * @return
      * @throws TException
      */
     @Override
-    public TGetColumnsResp GetColumns(TGetColumnsReq tGetColumnsReq) throws TException {
+    public TGetColumnsResp GetColumns(TGetColumnsReq req) throws TException {
         LOG.info("-------GetColumns---------");
-        return null;
+        TGetColumnsResp resp = new TGetColumnsResp();
+        try {
+            OperationHandle opHandle = cliService.getColumns(new SessionHandle(req.getSessionHandle()),
+                    req.getCatalogName(), req.getSchemaName(), req.getTableName(), req.getColumnName());
+            resp.setOperationHandle(opHandle.toTOperationHandle());
+            resp.setStatus(OK_STATUS);
+        } catch (Exception e) {
+            LOG.warn("Error getting columns: ", e);
+            resp.setStatus(HplsqlException.toTStatus(e));
+        }
+        return resp;
     }
 
     /**
      * 获取函数
      * jdbc调用入口HiveDatabaseMetaData.getFunctions(String catalogName, String schemaPattern, String functionNamePattern)
      *
-     * @param tGetFunctionsReq -sessionHandle catalogName schemaName functionName
+     * @param req -sessionHandle catalogName schemaName functionName
      * @return
      * @throws TException
      */
     @Override
-    public TGetFunctionsResp GetFunctions(TGetFunctionsReq tGetFunctionsReq) throws TException {
+    public TGetFunctionsResp GetFunctions(TGetFunctionsReq req) throws TException {
         LOG.info("-------GetFunctions---------");
-        return null;
+        TGetFunctionsResp resp = new TGetFunctionsResp();
+        try {
+            OperationHandle opHandle = cliService.getFunctions(
+                    new SessionHandle(req.getSessionHandle()), req.getCatalogName(),
+                    req.getSchemaName(), req.getFunctionName());
+            resp.setOperationHandle(opHandle.toTOperationHandle());
+            resp.setStatus(OK_STATUS);
+        } catch (Exception e) {
+            LOG.warn("Error getting functions: ", e);
+            resp.setStatus(HplsqlException.toTStatus(e));
+        }
+        return resp;
     }
 
     /**

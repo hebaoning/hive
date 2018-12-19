@@ -4,10 +4,7 @@ import org.apache.hive.hplsql.service.common.conf.ServerConf;
 import org.apache.hive.hplsql.service.common.exception.HplsqlException;
 import org.apache.hive.hplsql.service.common.handle.OperationHandle;
 import org.apache.hive.hplsql.service.common.handle.SessionHandle;
-import org.apache.hive.hplsql.service.operation.ExecuteStatementOperation;
-import org.apache.hive.hplsql.service.operation.Executor;
-import org.apache.hive.hplsql.service.operation.GetTypeInfoOperation;
-import org.apache.hive.hplsql.service.operation.OperationManager;
+import org.apache.hive.hplsql.service.operation.*;
 import org.apache.hive.service.cli.FetchOrientation;
 import org.apache.hive.service.cli.FetchType;
 import org.apache.hive.service.cli.RowSet;
@@ -75,14 +72,12 @@ public class HplsqlSessionImpl implements HplsqlSession {
     @Override
     public OperationHandle executeStatement(String statement, Map<String, String> confOverlay) throws HplsqlException {
         OperationHandle operationHandle = executeStatementInternal(statement, confOverlay, false);
-        lastAccessTime = System.currentTimeMillis();
         return operationHandle;
     }
 
     @Override
     public OperationHandle executeStatementAsync(String statement, Map<String, String> confOverlay) throws HplsqlException {
         OperationHandle operationHandle = executeStatementInternal(statement, confOverlay, true);
-        lastAccessTime = System.currentTimeMillis();
         return operationHandle;
     }
 
@@ -95,44 +90,84 @@ public class HplsqlSessionImpl implements HplsqlSession {
 
     private OperationHandle executeStatementInternal(String statement,
                                                      Map<String, String> confOverlay, boolean runAsync) throws HplsqlException {
-        ExecuteStatementOperation operation;
-        OperationHandle opHandle = null;
-        try {
-            operation = getOperationManager().newExecuteStatementOperation(getSession(), statement,
-                    confOverlay, runAsync);
-            opHandle = operation.getHandle();
-            addOpHandle(opHandle);
-            operation.run();
-            return opHandle;
-        } catch (HplsqlException e) {
-            if (opHandle != null) {
-                removeOpHandle(opHandle);
-                getOperationManager().closeOperation(opHandle);
+        ExecuteStatementOperation operation = operationManager.newExecuteStatementOperation(getSession(), statement, confOverlay, runAsync);
+        saveAndRunOperation(operation);
+        return operation.getHandle();
+    }
+
+    @Override
+    public OperationHandle getTypeInfo() throws HplsqlException {
+        GetTypeInfoOperation operation = operationManager.newGetTypeInfoOperation(getSession());
+        saveAndRunOperation(operation);
+        return operation.getHandle();
+    }
+
+    @Override
+    public OperationHandle getCatalogs() throws HplsqlException {
+        GetCatalogsOperation operation = operationManager.newGetCatalogsOperation(getSession());
+        saveAndRunOperation(operation);
+        return operation.getHandle();
+    }
+
+    @Override
+    public OperationHandle getSchemas() throws HplsqlException {
+        GetSchemasOperation operation = operationManager.newGetSchemasOperation(getSession());
+        saveAndRunOperation(operation);
+        return operation.getHandle();
+    }
+
+    @Override
+    public OperationHandle getTables(String catalogName, String schemaName, String tableName,
+                                     List<String> tableTypes) throws HplsqlException {
+        GetTablesOperation operation = operationManager.newGetTablesOperation(getSession(), catalogName, schemaName, tableName, tableTypes);
+        saveAndRunOperation(operation);
+        return operation.getHandle();
+    }
+
+    @Override
+    public OperationHandle getColumns(String catalog, String schemaPattern,
+                                      String tableNamePattern, String columnNamePattern) throws HplsqlException {
+        GetColumnsOperation operation =
+                operationManager.newGetColumnsOperation(getSession(), catalog, schemaPattern, tableNamePattern, columnNamePattern);
+        saveAndRunOperation(operation);
+        return operation.getHandle();
+    }
+
+    @Override
+    public OperationHandle getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws HplsqlException {
+        GetFunctionsOperarion operation =
+                operationManager.newGetFunctionsOperarion(getSession(), catalog, schemaPattern, functionNamePattern);
+        saveAndRunOperation(operation);
+        return operation.getHandle();
+    }
+
+
+
+    /**
+     * 保存operationHandle，并执行operation
+     * @param operation
+     * @throws HplsqlException
+     */
+    private void saveAndRunOperation(Operation operation) throws HplsqlException{
+        if(operation != null){
+            OperationHandle opHandle = operation.getHandle();
+            try {
+                addOpHandle(operation.getHandle());
+                operation.run();
+                lastAccessTime = System.currentTimeMillis();
+            } catch (HplsqlException e) {
+                if (opHandle != null) {
+                    removeOpHandle(opHandle);
+                    operationManager.closeOperation(opHandle);
+                }
+                throw e;
             }
-            throw e;
         }
     }
 
     private void addOpHandle(OperationHandle opHandle) {
         synchronized (opHandleSet) {
             opHandleSet.add(opHandle);
-        }
-    }
-
-    @Override
-    public OperationHandle getTypeInfo() throws HplsqlException {
-        OperationManager operationManager = getOperationManager();
-        GetTypeInfoOperation operation = operationManager.newGetTypeInfoOperation(getSession());
-        OperationHandle opHandle = operation.getHandle();
-        try {
-            addOpHandle(opHandle);
-            operation.run();
-            lastAccessTime = System.currentTimeMillis();
-            return opHandle;
-        } catch (HplsqlException e) {
-            removeOpHandle(opHandle);
-            operationManager.closeOperation(opHandle);
-            throw e;
         }
     }
 

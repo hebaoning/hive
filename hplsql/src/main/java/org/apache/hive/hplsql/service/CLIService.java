@@ -8,15 +8,13 @@ import org.apache.hive.hplsql.service.operation.Operation;
 import org.apache.hive.hplsql.service.operation.OperationStatus;
 import org.apache.hive.hplsql.service.session.HplsqlSession;
 import org.apache.hive.hplsql.service.session.SessionManager;
-import org.apache.hive.service.cli.FetchOrientation;
-import org.apache.hive.service.cli.FetchType;
-import org.apache.hive.service.cli.RowSet;
-import org.apache.hive.service.cli.TableSchema;
+import org.apache.hive.service.cli.*;
 import org.apache.hive.service.rpc.thrift.TGetInfoType;
 import org.apache.hive.service.rpc.thrift.TProtocolVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -61,9 +59,42 @@ public class CLIService {
 
     public OperationHandle getTypeInfo(SessionHandle sessionHandle)
             throws HplsqlException {
-        OperationHandle opHandle = sessionManager.getSession(sessionHandle)
-                .getTypeInfo();
+        OperationHandle opHandle = sessionManager.getSession(sessionHandle).getTypeInfo();
         LOG.debug(sessionHandle + ": getTypeInfo()");
+        return opHandle;
+    }
+
+    public OperationHandle getCatalogs(SessionHandle sessionHandle) throws HplsqlException {
+        OperationHandle opHandle = sessionManager.getSession(sessionHandle).getCatalogs();
+        LOG.debug(sessionHandle + ": getCatalogs()");
+        return opHandle;
+    }
+
+    public OperationHandle getSchemas(SessionHandle sessionHandle)
+            throws HplsqlException {
+        OperationHandle opHandle = sessionManager.getSession(sessionHandle).getSchemas();
+        LOG.debug(sessionHandle + ": getSchemas()");
+        return opHandle;
+    }
+
+    public OperationHandle getTables(SessionHandle sessionHandle, String catalogName,
+                                     String schemaName, String tableName, List<String> tableTypes) throws HplsqlException {
+        OperationHandle opHandle = sessionManager.getSession(sessionHandle).getTables(catalogName, schemaName, tableName, tableTypes);
+        LOG.debug(sessionHandle + ": getTables()");
+        return opHandle;
+    }
+
+    public OperationHandle getColumns(SessionHandle sessionHandle, String catalog, String schemaPattern,
+                                      String tableNamePattern, String columnNamePattern) throws HplsqlException {
+        OperationHandle opHandle = sessionManager.getSession(sessionHandle).getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
+        LOG.debug(sessionHandle + ": getColumns()");
+        return opHandle;
+    }
+
+    public OperationHandle getFunctions(SessionHandle sessionHandle, String catalog,
+                                        String schemaPattern, String functionNamePattern) throws HplsqlException {
+        OperationHandle opHandle = sessionManager.getSession(sessionHandle).getFunctions(catalog, schemaPattern, functionNamePattern);
+        LOG.debug(sessionHandle + ": getFunctions()");
         return opHandle;
     }
 

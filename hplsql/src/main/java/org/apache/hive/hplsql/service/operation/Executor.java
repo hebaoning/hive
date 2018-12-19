@@ -91,6 +91,55 @@ public class Executor {
         }
     }
 
+    public synchronized ResultSet getCatalogs() throws HplsqlException {
+        try {
+            checkConnection();
+            return reuseConnection.getMetaData().getCatalogs();
+        } catch (Exception e) {
+            throw new HplsqlException("fail to getCatalogs:" + e.getMessage());
+        }
+    }
+
+    public synchronized ResultSet getSchemas() throws HplsqlException {
+        try {
+            checkConnection();
+            return reuseConnection.getMetaData().getSchemas();
+        } catch (Exception e) {
+            throw new HplsqlException("fail to getSchemas:" + e.getMessage());
+        }
+    }
+
+    public synchronized ResultSet getTables(String catalog, String schemaPattern,
+                                            String tableNamePattern, String[] types) throws HplsqlException {
+        try {
+            checkConnection();
+            return reuseConnection.getMetaData().getTables(catalog, schemaPattern, tableNamePattern, types);
+        } catch (Exception e) {
+            throw new HplsqlException("fail to getTables:" + e.getMessage());
+        }
+    }
+
+
+    public synchronized ResultSet getColumns(String catalog, String schemaPattern,
+                                            String tableNamePattern, String columnNamePattern) throws HplsqlException {
+        try {
+            checkConnection();
+            return reuseConnection.getMetaData().getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
+        } catch (Exception e) {
+            throw new HplsqlException("fail to getColumns:" + e.getMessage());
+        }
+    }
+
+    public synchronized ResultSet getFunctions(String catalog, String schemaPattern,
+                                             String functionNamePattern) throws HplsqlException {
+        try {
+            checkConnection();
+            return reuseConnection.getMetaData().getFunctions(catalog, schemaPattern, functionNamePattern);
+        } catch (Exception e) {
+            throw new HplsqlException("fail to getFunctions:" + e.getMessage());
+        }
+    }
+
     private Connection openConnection() throws HplsqlException {
         try {
             Connection conn = getConnection();
