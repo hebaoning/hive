@@ -200,16 +200,16 @@ Event: 4.210 Thread 0x00007f9ac180c800 Uncommon trap: reason=unstable_if action=
 Event: 4.210 Thread 0x00007f9ac180c800 Uncommon trap: reason=unstable_if action=reinterpret pc=0x000000010c5e151c method=java.lang.AbstractStringBuilder.append(Ljava/lang/String;)Ljava/lang/AbstractStringBuilder; @ 1
 
 Classes redefined (10 events):
-Event: 19001.183 Thread 0x00007f9ac182c000 redefined class name=TableFigureVisitor, count=9
-Event: 19109.264 Thread 0x00007f9ac182c000 redefined class name=TableFigureVisitor, count=10
-Event: 19232.849 Thread 0x00007f9ac182c000 redefined class name=TableFigureVisitor, count=11
-Event: 19277.560 Thread 0x00007f9ac182c000 redefined class name=TableFigureVisitor, count=12
-Event: 19400.862 Thread 0x00007f9ac182c000 redefined class name=TableFigureVisitor, count=13
-Event: 19498.779 Thread 0x00007f9ac182c000 redefined class name=TableFigureVisitor, count=14
-Event: 19711.004 Thread 0x00007f9ac182c000 redefined class name=TableFigureVisitor, count=15
-Event: 19992.575 Thread 0x00007f9ac182c000 redefined class name=TableFigureVisitor, count=16
-Event: 20382.791 Thread 0x00007f9ac182c000 redefined class name=TableFigureVisitor, count=17
-Event: 21655.407 Thread 0x00007f9ac182c000 redefined class name=TableFigureVisitor, count=18
+Event: 19001.183 Thread 0x00007f9ac182c000 redefined class name=FigureVisitor, count=9
+Event: 19109.264 Thread 0x00007f9ac182c000 redefined class name=FigureVisitor, count=10
+Event: 19232.849 Thread 0x00007f9ac182c000 redefined class name=FigureVisitor, count=11
+Event: 19277.560 Thread 0x00007f9ac182c000 redefined class name=FigureVisitor, count=12
+Event: 19400.862 Thread 0x00007f9ac182c000 redefined class name=FigureVisitor, count=13
+Event: 19498.779 Thread 0x00007f9ac182c000 redefined class name=FigureVisitor, count=14
+Event: 19711.004 Thread 0x00007f9ac182c000 redefined class name=FigureVisitor, count=15
+Event: 19992.575 Thread 0x00007f9ac182c000 redefined class name=FigureVisitor, count=16
+Event: 20382.791 Thread 0x00007f9ac182c000 redefined class name=FigureVisitor, count=17
+Event: 21655.407 Thread 0x00007f9ac182c000 redefined class name=FigureVisitor, count=18
 
 Internal exceptions (10 events):
 Event: 1.197 Thread 0x00007f9ac180c800 Exception <a 'java/security/PrivilegedActionException'> (0x00000007958d53a0) thrown at [/Users/java_re/workspace/8-2-build-macosx-x86_64/jdk8u181/11358/hotspot/src/share/vm/prims/jvm.cpp, line 1435]

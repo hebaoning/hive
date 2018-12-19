@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 遍历指定目录，获取所有 *.sql 文件的路径
  */
-public class GetFileList {
+public class GetFileUtil {
 
     public static  List<String> getFileList(String fileDir) {
 
@@ -22,6 +22,7 @@ public class GetFileList {
         for (File f : files) {
             if (f.isFile()) {
                 fileList.add(f.getPath());
+                System.out.println(f.getPath().toString());
             } else if (f.isDirectory()) {
                 getFileList(f.getAbsolutePath());
             }

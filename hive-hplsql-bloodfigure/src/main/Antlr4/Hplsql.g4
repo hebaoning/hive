@@ -62,7 +62,7 @@ stmt :
      | create_package_body_stmt
      | create_procedure_stmt
      | create_table_stmt
-     | create_view_stmt             // add  create_view_stmt
+     | create_view_stmt             // add  create_view_stmt.sql
      | declare_stmt
      | delete_stmt
      | describe_stmt
