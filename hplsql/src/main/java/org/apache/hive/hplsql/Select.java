@@ -170,9 +170,9 @@ public class Select {
     for (int i = 0; i < cnt; i++) {
       HplsqlParser.Cte_select_stmt_itemContext c = ctx.cte_select_stmt_item(i);      
       sql.append(c.ident().getText());
-      if (c.cte_select_cols() != null) {
-        sql.append(" " + exec.getFormattedText(c.cte_select_cols()));
-      }
+//      if (c.cte_select_cols() != null) {
+//        sql.append(" " + exec.getFormattedText(c.cte_select_cols()));
+//      }
       sql.append(" AS (");
       sql.append(evalPop(ctx.cte_select_stmt_item(i).fullselect_stmt()).toString());
       sql.append(")");
