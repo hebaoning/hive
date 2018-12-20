@@ -5,10 +5,10 @@ import java.util.Set;
 
 public class FigureVisitor extends HplsqlBaseVisitor {
 
-    String tableName = null;
-    String fromTableName = null;
-    String procName = null;
-    String viewName = null;
+    private String tableName = null;
+    private String fromTableName = null;
+    private String procName = null;
+    private String viewName = null;
     //用于存放最终结果
     Set<Relation> resultSet = new HashSet<Relation>();
     //用于存放影响表,保存结果中使用，会清空
@@ -19,7 +19,7 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     /**
      * 判断是否是表名，过滤中间表，日志表
      */
-    public boolean isTableName(String name) {
+    private boolean isTableName(String name) {
         if (!name.contains("SESSION.") && !name.contains("ETL_ERRLOG_INFO")
             && !name.contains("ETL.PROCLOG")) {
             return true;
@@ -31,7 +31,7 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     /**
      * 将表之间关系，或表和存储过程关系存入 relation 对象
      */
-    public void insertResultSet(String name1, String name2) {
+    private void insertResultSet(String name1, String name2) {
         Relation relation = new Relation();
         relation.setFromTable(name1);
         relation.setToTable(name2);
@@ -42,7 +42,7 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     /**
      * 保存结果
      */
-    public void saveResult(String tableName, Set<String> tmpSet) {
+     private void saveResult(String tableName, Set<String> tmpSet) {
         if (isTableName(tableName)) {
             //判断是否获得存储过程名和影响表
             if (!tmpSet.isEmpty()) {
@@ -50,14 +50,12 @@ public class FigureVisitor extends HplsqlBaseVisitor {
                     //先保存存储过程和目标表的关系
                     if (!addedSet.contains(procName + tableName)) {
                         insertResultSet(procName, tableName);
-                        addedSet.add(procName + tableName);
                     }
                     //再保存影响表和存储过程的关系
                     for (String fromTableName : tmpSet
                     ) {
                         if (!addedSet.contains(fromTableName + procName)) {
                             insertResultSet(fromTableName, procName);
-                            addedSet.add(fromTableName + procName);
                         }
                     }
                     //保存后，清空 tmpSet
@@ -68,7 +66,6 @@ public class FigureVisitor extends HplsqlBaseVisitor {
                     for (String fromTableName : tmpSet) {
                         if (!addedSet.contains(fromTableName + tableName)) {
                             insertResultSet(fromTableName, tableName);
-                            addedSet.add(fromTableName + tableName);
                         }
 
                     }
