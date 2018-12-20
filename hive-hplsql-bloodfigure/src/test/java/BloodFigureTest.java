@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.stringtemplate.v4.ST;
 
 /*
  *项目名: hive
