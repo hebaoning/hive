@@ -13,9 +13,11 @@ public class BloodFigure {
 
     public static void main(String[] args) throws IOException {
         //指定目录
-        String fileDir = "/Users/jianjie/Desktop/test类/";
+        String fileDir = "/Users/jianjie/Desktop/sp";
 
-        List<String> fileList = GetFileUtil.getFileList(fileDir);
+        GetFileUtil getFileUtil = new GetFileUtil();
+        List<String> fileList = getFileUtil.getFileList(fileDir);
+        System.out.println("存储过程数量:" + fileList.size());
         List<Relation> list = new ArrayList<>();
         ExportExcelUtil<Relation> util = new ExportExcelUtil<Relation>();
 
@@ -47,7 +49,7 @@ public class BloodFigure {
 
         String[] columnNames = {"From", "To"};
         //按指定的Excel版本，文件路径进行输出
-        util.exportExcel("存储依赖", columnNames, list, new FileOutputStream("/Users/jianjie/Desktop/test/test3.xls"), ExportExcelUtil.EXCEl_FILE_2007);
+        util.exportExcel("存储依赖", columnNames, list, new FileOutputStream("/Users/jianjie/Desktop/test/test.xls"), ExportExcelUtil.EXCEl_FILE_2007);
 
     }
 }

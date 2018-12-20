@@ -9,9 +9,9 @@ import java.util.List;
  */
 public class GetFileUtil {
 
-    public static  List<String> getFileList(String fileDir) {
+    List<String> fileList = new ArrayList<String>();
 
-        List<String> fileList = new ArrayList<String>();
+    public List<String> getFileList(String fileDir) {
         File file = new File(fileDir);
         File[] files = file.listFiles();
 
@@ -21,8 +21,10 @@ public class GetFileUtil {
         // 递归遍历
         for (File f : files) {
             if (f.isFile()) {
-                fileList.add(f.getPath());
-                System.out.println(f.getPath().toString());
+                if (f.getPath().toLowerCase().contains(".sql")) {
+                    fileList.add(f.getPath());
+                }
+
             } else if (f.isDirectory()) {
                 getFileList(f.getAbsolutePath());
             }
