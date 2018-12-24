@@ -8,7 +8,7 @@ import org.apache.hive.service.cli.TableSchema;
 
 import java.sql.ResultSet;
 
-public class GetTypeInfoOperation extends GetDatabaseMetaDataOperation {
+public class GetTypeInfoOperation extends ObtainResultSetOperation {
 
     public GetTypeInfoOperation(HplsqlSession parentSession) {
         super(parentSession, OperationType.GET_TYPE_INFO);

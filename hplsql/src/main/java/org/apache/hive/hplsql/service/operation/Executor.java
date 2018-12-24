@@ -1,7 +1,5 @@
 package org.apache.hive.hplsql.service.operation;
 
-import org.apache.commons.collections.bag.SynchronizedSortedBag;
-import org.apache.commons.io.FileUtils;
 import org.apache.hive.hplsql.Exec;
 import org.apache.hive.hplsql.service.common.HplsqlResponse;
 import org.apache.hive.hplsql.service.common.conf.ServerConf;
@@ -13,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.SocketException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -29,11 +28,14 @@ public class Executor {
     }
 
     public void init() throws HplsqlException {
+        //hplsql 不一定使用默认连接conf.defaultConnection
         reuseConnection = openConnection();
     }
 
-    public synchronized HplsqlResponse runHpl(String statement, OperationHandle operationHandle , boolean saveResultToFile) throws Exception {
+    public synchronized HplsqlResponse runHpl(String statement, OperationHandle operationHandle , boolean saveResultToFile)  throws Exception{
+        //1.检查连接是否关闭，关闭则创建新的连接
         checkConnection();
+        //2.定义结果对象
         OutputStream outputStream;
         File file = null;
         HplsqlResponse response;
@@ -48,22 +50,31 @@ public class Executor {
         } else{
             outputStream = new ByteArrayOutputStream();
         }
-        //hplsql执行结果会输出到不同文件，防止不同线程执行时都将结果打印到标准输出，造成结果数据交叉
+        //3.执行hpl
+        //hplsql执行结果会输出到不同outputStream，防止不同线程执行时都将结果打印到标准输出，造成结果数据交叉
         PrintWriter printWriter = new PrintWriter(outputStream);
         String[] args = {"-e",  statement};
-        int responseCode = excuteHplCmd(args,printWriter);
-        printWriter.flush(); //将缓冲区的数据写出到底层输出流中
-        response = saveResultToFile ? new HplsqlResponse(responseCode, file)
-                : new HplsqlResponse(responseCode, ((ByteArrayOutputStream) outputStream).toByteArray());
+        Exec exec = new Exec(reuseConnection, printWriter);
+        int responseCode;
+        try {
+            responseCode = exec.run(args);
+        }catch (SocketException e){
+            //如果连接长时间未使用，会报SocketException异常，使得连接不可用，此时需关闭该连接，后续使用新的连接执行
+            reuseConnection.close();
+            throw e;
+        }
+        //4.保存执行结果
+        if(exec.getResultSet() != null){
+            response = new HplsqlResponse(responseCode, exec.getResultSet());
+        }else {
+            printWriter.flush(); //将缓冲区的数据写出到底层输出流中
+            response = saveResultToFile ? new HplsqlResponse(responseCode, file)
+                    : new HplsqlResponse(responseCode, ((ByteArrayOutputStream) outputStream).toByteArray());
+        }
         printWriter.close();
         return response;
     }
 
-    private int excuteHplCmd(String[] args, PrintWriter printWriter) throws Exception{
-        //hplsql 不一定使用默认连接conf.defaultConnection
-        Exec exec = new Exec(reuseConnection, printWriter);
-        return exec.run(args);
-    }
 
     //目前不会并发执行该方法，synchronized是保证只有一个线程使用connection对象
     public synchronized String getInfo(TGetInfoType type) throws HplsqlException {

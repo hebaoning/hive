@@ -15,19 +15,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-public class ExecuteStatementOperation extends Operation {
+public class ExecuteStatementOperation extends ObtainResultSetOperation {
     protected String statement;
     private HplsqlResponse response;
     private TableSchema resultSchema;
-    private Executor executor;
+    private boolean singleSelectResult;
     private final boolean runAsync;
+    private HplExecuteResult hplResult;
 
     public ExecuteStatementOperation(HplsqlSession parentSession, String statement,
                                      Map<String, String> confOverlay, boolean runInBackground) {
-        super(parentSession, confOverlay, OperationType.EXECUTE_STATEMENT);
+        super(parentSession, OperationType.EXECUTE_STATEMENT);
         this.statement = statement;
         this.runAsync = runInBackground;
-        this.executor = parentSession.getExcutor();
     }
 
     public String getStatement() {
@@ -74,7 +74,13 @@ public class ExecuteStatementOperation extends Operation {
             if (0 != response.getResponseCode()) {
                 throw new HplsqlException("Error while processing statement");
             }
-            operationResult = saveResultToFile ? new OperationResult(response.getFile()) : new OperationResult(response.getResultBytes());
+            if(response.getResultSet() != null){
+                singleSelectResult = true;
+                resultSetDecorator = new ResultSetDecorator(response.getResultSet());
+            }else{
+                hplResult = saveResultToFile ? new HplExecuteResult(response.getFile()) : new HplExecuteResult(response.getResultBytes());
+            }
+            hplResult = saveResultToFile ? new HplExecuteResult(response.getFile()) : new HplExecuteResult(response.getResultBytes());
         } catch (Throwable e) {
             if ((getStatus().getState() == OperationState.CANCELED) || (getStatus().getState() == OperationState.CLOSED) || (
                     getStatus().getState() == OperationState.FINISHED)) {
@@ -94,6 +100,9 @@ public class ExecuteStatementOperation extends Operation {
 
     @Override
     public TableSchema getResultSetSchema() throws HplsqlException {
+        if(singleSelectResult){
+            return super.getResultSetSchema();
+        }
         if (resultSchema == null) {
             resultSchema = new TableSchema().addStringColumn("output","hpl execute output");
         }
@@ -102,17 +111,18 @@ public class ExecuteStatementOperation extends Operation {
 
     @Override
     public RowSet getNextRowSet(FetchOrientation orientation, long maxRows) throws HplsqlException {
+        if(singleSelectResult){
+            return super.getNextRowSet(orientation, maxRows);
+        }
         assertState(new ArrayList<>(Arrays.asList(OperationState.FINISHED)));
         TableSchema tableSchema = getTableSchema();
         RowSet rowSet = RowSetFactory.create(tableSchema, getProtocolVersion(),false);
 
-        // 获取结果集对象
-        OperationResult operationResult = getOperationResult();
-        if (operationResult == null) {
+        if (hplResult == null) {
             throw new HplsqlException("Couldn't find operation result: " + getHandle());
         }
         // 读取结果数据
-        List<String> resultStrings  = operationResult.read(isFetchFirst(orientation), maxRows);
+        List<String> resultStrings  = hplResult.read(isFetchFirst(orientation), maxRows);
 
         // 将结果数据转换为RowSet形式返回
         for (String resultString : resultStrings) {
@@ -134,6 +144,7 @@ public class ExecuteStatementOperation extends Operation {
         }
         return false;
     }
+
     @Override
     public void cancel() throws HplsqlException {
         OperationState opState = getStatus().getState();
@@ -142,14 +153,22 @@ public class ExecuteStatementOperation extends Operation {
             return;
         }
         cancelExecuteTask();
+        if(singleSelectResult){
+            super.cancel();
+        }
         setState(OperationState.CANCELED);
     }
 
     @Override
     public void close() throws HplsqlException {
         cancelExecuteTask();
+        if(hplResult != null){
+            hplResult.close();
+        }
+        if(singleSelectResult){
+            super.close();
+        }
         setState(OperationState.CLOSED);
-        operationResult.close();
     }
 
     private void cancelExecuteTask(){

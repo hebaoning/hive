@@ -17,6 +17,7 @@ import java.util.concurrent.Future;
 
 public abstract class Operation {
     public static final Logger LOG = LoggerFactory.getLogger(Operation.class.getName());
+    protected Executor executor;
 
     protected final HplsqlSession parentSession;
     private final OperationHandle opHandle;
@@ -25,7 +26,6 @@ public abstract class Operation {
     protected boolean hasResultSet;
     protected volatile HplsqlException operationException;
     protected volatile Future<?> backgroundHandle;
-    protected OperationResult operationResult;
 
     private final long beginTime;
     private volatile long lastAccessTime;
@@ -39,6 +39,7 @@ public abstract class Operation {
     protected Operation(HplsqlSession parentSession, Map<String, String> confOverlay, OperationType opType) {
         this.parentSession = parentSession;
         this.opHandle = new OperationHandle(opType, parentSession.getProtocolVersion());
+        this.executor = parentSession.getExcutor();
         beginTime = System.currentTimeMillis();
         lastAccessTime = beginTime;
     }
@@ -152,7 +153,4 @@ public abstract class Operation {
         return opHandle.getProtocolVersion();
     }
 
-    public OperationResult getOperationResult() {
-        return operationResult;
-    }
 }

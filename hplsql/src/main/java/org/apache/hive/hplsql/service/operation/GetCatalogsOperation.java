@@ -5,7 +5,7 @@ import org.apache.hive.hplsql.service.session.HplsqlSession;
 
 import java.sql.ResultSet;
 
-public class GetCatalogsOperation extends GetDatabaseMetaDataOperation {
+public class GetCatalogsOperation extends ObtainResultSetOperation {
     public GetCatalogsOperation(HplsqlSession parentSession) {
         super(parentSession, OperationType.GET_CATALOGS);
     }

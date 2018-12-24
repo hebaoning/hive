@@ -6,17 +6,17 @@ import org.apache.hive.service.cli.FetchOrientation;
 import org.apache.hive.service.cli.RowSet;
 import org.apache.hive.service.cli.TableSchema;
 
-public abstract class GetDatabaseMetaDataOperation extends Operation{
-    protected Executor executor;
-
+/**
+ * 获取hive结果集的操作类型
+ */
+public abstract class ObtainResultSetOperation extends Operation{
     /**
      * 包装jdbc访问hive获取的结果集
      */
     protected ResultSetDecorator resultSetDecorator;
 
-    protected GetDatabaseMetaDataOperation(HplsqlSession parentSession, OperationType opType) {
+    public ObtainResultSetOperation(HplsqlSession parentSession, OperationType opType) {
         super(parentSession, opType);
-        this.executor = getParentSession().getExcutor();
     }
 
     @Override

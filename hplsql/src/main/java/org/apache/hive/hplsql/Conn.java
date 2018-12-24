@@ -125,7 +125,9 @@ public class Conn {
    * Close the query object
    */
   public void closeQuery(Query query, String connName) {
-    query.closeStatement(); 
+    if(!exec.singleSelectStmtOnServerMode){
+      query.closeStatement();
+    }
     returnConnection(connName, query.getConnection());
   }
   

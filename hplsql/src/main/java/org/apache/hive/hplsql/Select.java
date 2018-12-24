@@ -127,28 +127,22 @@ public class Select {
         if (trace) {
           trace(ctx, "Standalone SELECT executed: " + cols + " columns in the result set");
         }
-        for(int i=1;i<=cols;i++){
-          if (i > 1) {
-            System.out.print("\t");
-            exec.outputPrint("\t");
-          }
-          System.out.print(rm.getColumnName(i));
-          exec.outputPrint(rm.getColumnName(i));
-        }
-        System.out.println("");
-        exec.outputPrintln("");
-        while (rs.next()) {
-          for (int i = 1; i <= cols; i++) {
-            if (i > 1) {
-              System.out.print("\t");
-              exec.outputPrint("\t");
+        if(exec.singleSelectStmtOnServerMode){
+          exec.resultSet = rs;
+        }else {
+          while (rs.next()) {
+            for (int i = 1; i <= cols; i++) {
+              if (i > 1) {
+                System.out.print("\t");
+                exec.outputPrint("\t");
+              }
+              System.out.print(rs.getString(i));
+              exec.outputPrint(rs.getString(i));
             }
-            System.out.print(rs.getString(i));
-            exec.outputPrint(rs.getString(i));
+            System.out.println("");
+            exec.outputPrintln("");
+            exec.incRowCount();
           }
-          System.out.println("");
-          exec.outputPrintln("");
-          exec.incRowCount();
         }
       }
       // Scalar subquery

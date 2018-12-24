@@ -7,18 +7,18 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OperationResult {
+public class HplExecuteResult {
     private BufferedReader reader;
     private File file;
     private byte[] resultBytes;
     private boolean saveToFile;
 
-    public OperationResult(File file) {
+    public HplExecuteResult(File file) {
         this.file = file;
         this.saveToFile = true;
     }
 
-    public OperationResult(byte[] resultBytes) {
+    public HplExecuteResult(byte[] resultBytes) {
         this.resultBytes = resultBytes;
     }
 

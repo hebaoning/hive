@@ -5,7 +5,7 @@ import org.apache.hive.hplsql.service.session.HplsqlSession;
 
 import java.sql.ResultSet;
 
-public class GetTablesOperation extends GetDatabaseMetaDataOperation{
+public class GetTablesOperation extends ObtainResultSetOperation{
     String catalog;
     String schemaPattern;
     String tableNamePattern;
