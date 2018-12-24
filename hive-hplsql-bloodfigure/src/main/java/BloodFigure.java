@@ -22,7 +22,6 @@ public class BloodFigure {
         ExportExcelUtil<Relation> util = new ExportExcelUtil<Relation>();
 
         for (int i = 0; i < fileList.size(); i++) {
-
             String inputFile = fileList.get(i);
             if (args.length > 0) {
                 inputFile = args[0];

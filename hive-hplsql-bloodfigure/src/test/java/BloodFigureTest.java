@@ -36,6 +36,20 @@ import org.stringtemplate.v4.ST;
     }
 
     @Test
+    public void testInsert_stmt2() throws Exception {
+        String testFile = "insert_stmt2";
+        run(testFile);
+
+    }
+
+    @Test
+    public void testInsert_stmt3() throws Exception {
+        String testFile = "insert_stmt3";
+        run(testFile);
+
+    }
+
+    @Test
     public void testMerge_stmt() throws Exception {
         String testFile = "merge_stmt";
         run(testFile);
@@ -53,11 +67,6 @@ import org.stringtemplate.v4.ST;
         run(testFile);
     }
 
-    @Test
-    public void testProc_stmt() throws Exception {
-        String testFile = "proc_stmt";
-        run(testFile);
-    }
 
     /**
      * 运行测试
@@ -104,19 +113,12 @@ import org.stringtemplate.v4.ST;
      * 将测试结果写入临时文件
      * @param content
      */
-    void writeToFile(String content) {
-        BufferedWriter bw = null;
-        try {
-            FileWriter fs = new FileWriter(tmpFile);
-            bw = new BufferedWriter(fs);
-            bw.write(content);
-            bw.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+    void writeToFile(String content) throws IOException {
+        FileWriter fs = new FileWriter(tmpFile);
+        BufferedWriter bw = new BufferedWriter(fs);
+        bw.write(content);
+        bw.flush();
+        bw.close();
         }
-    }
-
-
-
 
 }

@@ -52,8 +52,7 @@ public class FigureVisitor extends HplsqlBaseVisitor {
                         insertResultSet(procName, tableName);
                     }
                     //再保存影响表和存储过程的关系
-                    for (String fromTableName : tmpSet
-                    ) {
+                    for (String fromTableName : tmpSet) {
                         if (!addedSet.contains(fromTableName + procName)) {
                             insertResultSet(fromTableName, procName);
                         }
@@ -62,12 +61,10 @@ public class FigureVisitor extends HplsqlBaseVisitor {
                     tmpSet.clear();
                 } else {
                     //不存在存储过程名
-
                     for (String fromTableName : tmpSet) {
                         if (!addedSet.contains(fromTableName + tableName)) {
                             insertResultSet(fromTableName, tableName);
                         }
-
                     }
                     tmpSet.clear();
                 }
@@ -77,7 +74,7 @@ public class FigureVisitor extends HplsqlBaseVisitor {
 
 
     /**
-     *
+     *  每进入一个 insert_stmt,就会调用
      * @param ctx
      * @return
      */
@@ -94,7 +91,7 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     }
 
     /**
-     *
+     *  获取影响表
      * @param ctx
      * @return
      */
@@ -104,12 +101,11 @@ public class FigureVisitor extends HplsqlBaseVisitor {
         if (!fromTableName.contains("SESSION.")) {
             tmpSet.add(fromTableName);
         }
-
         return visitChildren(ctx);
     }
 
     /**
-     *
+     *  获取存储过程名
      * @param ctx
      * @return
      */
@@ -120,7 +116,7 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     }
 
     /**
-     *
+     *  merge_stmt 分析
      * @param ctx
      * @return
      */
