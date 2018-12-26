@@ -48,7 +48,7 @@ public class BloodFigure {
 
         String[] columnNames = {"From", "To"};
         //按指定的Excel版本，文件路径进行输出
-        util.exportExcel("存储依赖", columnNames, list, new FileOutputStream("/Users/jianjie/Desktop/test/test.xls"), ExportExcelUtil.EXCEl_FILE_2007);
+        util.exportExcel("存储依赖", columnNames, list, new FileOutputStream("/Users/jianjie/Desktop/test/test3.xls"), ExportExcelUtil.EXCEl_FILE_2007);
 
     }
 }

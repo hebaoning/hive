@@ -15,7 +15,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
-import org.stringtemplate.v4.ST;
 
 /*
  *项目名: hive
@@ -27,6 +26,13 @@ import org.stringtemplate.v4.ST;
  */class BloodFigureTest {
     //临时文件，存放结果
     String tmpFile = "/Users/jianjie/Desktop/jianjiejin/hive/hive-hplsql-bloodfigure/target/tmp/result.txt";
+
+    @Test
+    public void test() throws Exception {
+        String testFile = "test";
+        run(testFile);
+
+    }
 
     @Test
     public void testInsert_stmt1() throws Exception {
@@ -50,6 +56,13 @@ import org.stringtemplate.v4.ST;
     }
 
     @Test
+    public void testInsert_stmt4() throws Exception {
+        String testFile = "insert_stmt4";
+        run(testFile);
+
+    }
+
+    @Test
     public void testMerge_stmt() throws Exception {
         String testFile = "merge_stmt";
         run(testFile);
@@ -67,6 +80,17 @@ import org.stringtemplate.v4.ST;
         run(testFile);
     }
 
+    @Test
+    public void testProc() throws Exception {
+        String testFile = "proc";
+        run(testFile);
+    }
+
+    @Test
+    public void testUpdate_stmt() throws Exception {
+        String testFile = "update_stmt";
+        run(testFile);
+    }
 
     /**
      * 运行测试

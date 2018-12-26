@@ -81,26 +81,40 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     @Override
     public Object visitInsert_stmt(HplsqlParser.Insert_stmtContext ctx) {
         tableName = ctx.table_name().getText().toUpperCase();
-        //先保存一次结果
-        saveResult(tableName, tmpSet);
-        //返回执行对象，否则会退出遍历
+        //返回执行对象，否则会退出遍历，导致结果不完整
         Object ctx2 = visitChildren(ctx);
-        //遍历之后再保存一次结果
-        saveResult(tableName, tmpSet);
         return ctx2;
     }
 
     /**
-     *  获取影响表
+     * 获取 update 的表名
+     * @param ctx
+     * @return
+     */
+    @Override
+    public Object visitUpdate_table(HplsqlParser.Update_tableContext ctx) {
+        tableName = ctx.table_name().ident().getText();
+        Object ctx2 = visitChildren(ctx);
+        return ctx2;
+    }
+
+    /**
+     *  获取影响表,并保存结果
      * @param ctx
      * @return
      */
     @Override
     public Object visitFrom_table_name_clause(HplsqlParser.From_table_name_clauseContext ctx) {
         fromTableName = ctx.table_name().ident().getText().toUpperCase();
+        //过滤中间表
         if (!fromTableName.contains("SESSION.")) {
             tmpSet.add(fromTableName);
         }
+        //保存结果
+        if (tableName!=null) {
+            saveResult(tableName, tmpSet);
+        }
+
         return visitChildren(ctx);
     }
 
@@ -123,29 +137,30 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     @Override
     public Object visitMerge_stmt(HplsqlParser.Merge_stmtContext ctx) {
         tableName = ctx.merge_table(0).table_name().ident().getText().toUpperCase();
-        saveResult(tableName, tmpSet);
         Object ctx2 = visitChildren(ctx);
+        //本次merge情况，不会调用 visitFrom_table_name_clause 方法
+        //需要单独保存结果
         if (ctx.merge_table(1) != null && ctx.merge_table(1).select_stmt() == null) {
             fromTableName = ctx.merge_table(1).table_name().ident().getText().toUpperCase();
-            tmpSet.add(fromTableName);
+
+            if (!fromTableName.contains("SESSION.")) {
+                tmpSet.add(fromTableName);
+            }
+
+            if (tableName!=null) {
+                saveResult(tableName, tmpSet);
+            }
         }
-        saveResult(tableName, tmpSet);
         return ctx2;
     }
 
     /**
-     * 获取视图表名，直接存入结果
+     * 获取视图表名
      */
     @Override
     public Object visitCreate_view_stmt(HplsqlParser.Create_view_stmtContext ctx) {
-        viewName = ctx.ident().getText().toUpperCase();
+        tableName = ctx.ident().getText().toUpperCase();
         Object ctx2 = visitChildren(ctx);
-        for (String tableName : tmpSet) {
-            if (!addedSet.contains(tableName + viewName)) {
-                insertResultSet(tableName, viewName);
-            }
-        }
-        tmpSet.clear();
         return ctx2;
     }
 
