@@ -94,7 +94,7 @@ Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
 J 2 C2 java.lang.Object.<init>()V (1 bytes) @ 0x000000011a1092a4 [0x000000011a109260+0x44]
 j  org.antlr.v4.runtime.tree.AbstractParseTreeVisitor.<init>()V+1
 j  HplsqlBaseVisitor.<init>()V+1
-j  FigureVisitor.<init>()V+1
+j  BloodFigureAsExcelVisitor.<init>()V+1
 j  FigureVisitorTest.load()LTableFigureVisitor;+236
 j  FigureVisitorTest.visitInsert_stmt()V+3
 v  ~StubRoutines::call_stub
@@ -366,7 +366,7 @@ Event: 1.331 Thread 0x00007f8bf601c800 Exception <a 'java/security/PrivilegedAct
 Event: 1.495 Thread 0x00007f8bf601c800 Exception <a 'java/lang/NoSuchMethodError': java.lang.Object.lambda$or$2(Ljava/util/function/Predicate;Ljava/lang/Object;)Z> (0x00000007961386f8) thrown at [/Users/java_re/workspace/8-2-build-macosx-x86_64/jdk8u181/11358/hotspot/src/share/vm/interpreter/l
 Event: 1.921 Thread 0x00007f8bf601c800 Exception <a 'java/lang/IncompatibleClassChangeError': Found class java.lang.Object, but interface was expected> (0x0000000796396e68) thrown at [/Users/java_re/workspace/8-2-build-macosx-x86_64/jdk8u181/11358/hotspot/src/share/vm/interpreter/linkResolver.
 Event: 2.064 Thread 0x00007f8bf601c800 Exception <a 'java/lang/NoSuchMethodError': java.lang.Object.lambda$andThen$1(Ljava/util/function/Function;Ljava/lang/Object;)Ljava/lang/Object;> (0x00000007964d8340) thrown at [/Users/java_re/workspace/8-2-build-macosx-x86_64/jdk8u181/11358/hotspot/src/s
-Event: 2.151 Thread 0x00007f8bf601c800 Exception <a 'java/lang/NoSuchMethodError': java.lang.Object.lambda$accept$0(Lorg/junit/platform/engine/TestDescriptor$Visitor;Lorg/junit/platform/engine/TestDescriptor;)V> (0x00000007965843d8) thrown at [/Users/java_re/workspace/8-2-build-macosx-x86_64/j
+Event: 2.151 Thread 0x00007f8bf601c800 Exception <a 'java/lang/NoSuchMethodError': java.lang.Object.lambda$accept$0(Lorg/junit/platform/engine/TestDescriptor$BloodFigureAsGraphVisitor;Lorg/junit/platform/engine/TestDescriptor;)V> (0x00000007965843d8) thrown at [/Users/java_re/workspace/8-2-build-macosx-x86_64/j
 Event: 2.165 Thread 0x00007f8bf601c800 Exception <a 'java/lang/IncompatibleClassChangeError': Found class java.lang.Object, but interface was expected> (0x00000007965939a8) thrown at [/Users/java_re/workspace/8-2-build-macosx-x86_64/jdk8u181/11358/hotspot/src/share/vm/interpreter/linkResolver.
 Event: 2.171 Thread 0x00007f8bf601c800 Exception <a 'java/lang/NoSuchMethodError': java.lang.Object.containsTests(Lorg/junit/platform/engine/TestDescriptor;)Z> (0x000000079659a3e8) thrown at [/Users/java_re/workspace/8-2-build-macosx-x86_64/jdk8u181/11358/hotspot/src/share/vm/interpreter/linkR
 Event: 2.578 Thread 0x00007f8bf601c800 Exception <a 'java/lang/NoSuchMethodError': java.lang.Object.lambda$and$0(Ljava/util/function/Predicate;Ljava/lang/Object;)Z> (0x00000007969eb430) thrown at [/Users/java_re/workspace/8-2-build-macosx-x86_64/jdk8u181/11358/hotspot/src/share/vm/interpreter/

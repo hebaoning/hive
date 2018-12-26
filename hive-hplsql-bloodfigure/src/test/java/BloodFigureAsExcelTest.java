@@ -18,12 +18,12 @@ import org.junit.jupiter.api.Test;
 
 /*
  *项目名: hive
- *文件名: BloodFigureTest
+ *文件名: BloodFigureAsExcelTest
  *创建者: jianjiejin
  *创建时间:2018/12/18 5:33 PM
  *描述: TODO
 
- */class BloodFigureTest {
+ */class BloodFigureAsExcelTest {
     //临时文件，存放结果
     String tmpFile = "/Users/jianjie/Desktop/jianjiejin/hive/hive-hplsql-bloodfigure/target/tmp/result.txt";
 
@@ -107,7 +107,7 @@ import org.junit.jupiter.api.Test;
         HplsqlParser parser = new HplsqlParser(tokenStream);
         ParseTree tree = parser.program();
         // 自定义visitor遍历
-        FigureVisitor visitor = new FigureVisitor();
+        BloodFigureAsExcelVisitor visitor = new BloodFigureAsExcelVisitor();
         visitor.visit(tree);
         Set<Relation> relationSet = visitor.getResultSet();
         //结果按首字母排序

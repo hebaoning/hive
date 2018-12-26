@@ -3,7 +3,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class FigureVisitor extends HplsqlBaseVisitor {
+public class BloodFigureAsExcelVisitor extends HplsqlBaseVisitor {
 
     private String tableName = null;
     private String fromTableName = null;
@@ -17,11 +17,12 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     Set<String> addedSet = new HashSet<>();
 
     /**
-     * 判断是否是表名，过滤中间表，日志表
+     * 判断是否是表名，过滤中间表，日志表,临时表
      */
     private boolean isTableName(String name) {
-        if (!name.contains("SESSION.") && !name.contains("ETL_ERRLOG_INFO")
-            && !name.contains("ETL.PROCLOG")) {
+        if (!name.startsWith("SESSION.") && !name.equals("ETL_ERRLOG_INFO")
+            && !name.equals("ETL.PROCLOG") && !name.startsWith("TEMP_")
+            && !name.startsWith("TMP_")) {
             return true;
         } else {
             return false;
@@ -106,8 +107,9 @@ public class FigureVisitor extends HplsqlBaseVisitor {
     @Override
     public Object visitFrom_table_name_clause(HplsqlParser.From_table_name_clauseContext ctx) {
         fromTableName = ctx.table_name().ident().getText().toUpperCase();
-        //过滤中间表
-        if (!fromTableName.contains("SESSION.")) {
+        //过滤中间表,临时表
+        if (!fromTableName.startsWith("SESSION.") && !fromTableName.startsWith("TMP_")
+            && !fromTableName.startsWith("TEMP_")) {
             tmpSet.add(fromTableName);
         }
         //保存结果
@@ -143,7 +145,8 @@ public class FigureVisitor extends HplsqlBaseVisitor {
         if (ctx.merge_table(1) != null && ctx.merge_table(1).select_stmt() == null) {
             fromTableName = ctx.merge_table(1).table_name().ident().getText().toUpperCase();
 
-            if (!fromTableName.contains("SESSION.")) {
+            if (!fromTableName.startsWith("SESSION.") && !fromTableName.startsWith("TMP_")
+                && !fromTableName.startsWith("TEMP_")) {
                 tmpSet.add(fromTableName);
             }
 

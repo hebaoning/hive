@@ -1,1 +1,24 @@
 --临时测试使用
+WITH TEMP_CARD_1
+  AS
+  (
+   SELECT t1.CARD_ID,
+          t1.ACCT_ID,
+          ROW_NUMBER()OVER(PARTITION BY t1.ACCT_ID ORDER BY t1.CARD_ST,t1.BG_DT DESC,t1.BG_CARD_DT DESC) AS ROW_NO
+   FROM DW_SAVING_CARD_INFO t1
+   WHERE EXISTS(
+                SELECT 1
+                FROM DW_SAVING_CARD_INFO t2
+                WHERE t2.ACCT_ID = t1.ACCT_ID
+                  AND t2.ETL_DATE = I_ETL_DATE
+                )
+  )
+  INSERT INTO SESSION.TMP_CARD_ACCT_MAP
+  (
+   CARD_ID,
+   ACCT_ID
+  )
+  SELECT CARD_ID,
+         ACCT_ID
+  FROM TEMP_CARD_1
+  WHERE ROW_NO = 1;
