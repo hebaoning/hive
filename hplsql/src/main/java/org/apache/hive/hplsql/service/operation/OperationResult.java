@@ -7,18 +7,18 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HplExecuteResult {
+public class OperationResult {
     private BufferedReader reader;
     private File file;
     private byte[] resultBytes;
     private boolean saveToFile;
 
-    public HplExecuteResult(File file) {
+    public OperationResult(File file) {
         this.file = file;
         this.saveToFile = true;
     }
 
-    public HplExecuteResult(byte[] resultBytes) {
+    public OperationResult(byte[] resultBytes) {
         this.resultBytes = resultBytes;
     }
 
@@ -50,6 +50,9 @@ public class HplExecuteResult {
         try {
             List<String> results = new ArrayList<String>();
             if (reader == null) {
+                if(file == null && resultBytes == null){
+                    return results;
+                }
                 reader = saveToFile ? new BufferedReader(new InputStreamReader(new FileInputStream(file)))
                         : new BufferedReader(new InputStreamReader(new ByteArrayInputStream(resultBytes))) ;
             }
@@ -74,12 +77,12 @@ public class HplExecuteResult {
      *
      * @throws HplsqlException
      */
-    public synchronized void close() throws HplsqlException {
+    public synchronized void close(boolean deleteFile) throws HplsqlException {
         try {
             if (reader != null) {
                 reader.close();
             }
-            if(file != null && file.exists()){
+            if(deleteFile && file != null && file.exists()){
                 file.delete();
             }
         } catch (IOException e) {

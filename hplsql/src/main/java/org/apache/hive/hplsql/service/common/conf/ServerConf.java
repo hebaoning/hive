@@ -1,6 +1,11 @@
 package org.apache.hive.hplsql.service.common.conf;
 
 import org.apache.hive.hplsql.Conf;
+import org.apache.hive.hplsql.service.common.utils.FileUtils;
+import org.apache.hive.hplsql.service.thrift.ThriftCLIService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sun.rmi.runtime.Log;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 配置文件，包含hplsql-site.xml配置信息。（可能同时被多个线程访问）
  */
 public class ServerConf{
+    public static final Logger LOG = LoggerFactory.getLogger(ServerConf.class);
     /**
      * 异步sql执行操作获取结果的轮询时间(ms)
      * 时间过长会阻碍其他请求获取执行结果
@@ -20,7 +26,16 @@ public class ServerConf{
      * 是否将hpl执行结果保存在文件
      */
     public static final boolean SAVE_RESULTS_TO_FILE = false;
-    public static final String RESULTS_FILE_DIR = "hplResults/";
+    /**
+     * hpl执行结果文件所在的目录
+     */
+    public static final String RESULTS_FILE_DIR = FileUtils.getClassesOrJarPath() + "hplResults/";
+    /**
+     * 存储过程文件所在的目录
+     * 默认地址：target/classes/procedures 或jar包所在的目录下的procedures文件夹
+     */
+    public static final String PROCEDURES_DIR = FileUtils.getClassesOrJarPath() + "procedures/";
+    public static final String PROCEDURES_FILE_EXT = ".sql";
     public static final String DEFAULT_CONN_DRIVER = "org.apache.hadoop.hive.jdbc.HiveDriver";
     private Conf hplsqlConf;
     private final Map<String, ArrayList<String>> connInits = new ConcurrentHashMap<>();
@@ -30,6 +45,8 @@ public class ServerConf{
         hplsqlConf = new Conf();
         hplsqlConf.init();
         initOptions();
+        LOG.info("RESULTS_FILE_DIR:" + RESULTS_FILE_DIR);
+        LOG.info("PROCEDURES_DIR:" + PROCEDURES_DIR);
     }
 
     /**
@@ -95,5 +112,10 @@ public class ServerConf{
 
     public ArrayList<String> getConnInits(String connName) {
         return connInits.get(connName);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(ServerConf.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        System.out.println( System.getProperty("java.class.path") );
     }
 }

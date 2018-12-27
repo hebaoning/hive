@@ -12,8 +12,15 @@ public class GetCatalogsOperation extends ObtainResultSetOperation {
 
     @Override
     public void run() throws HplsqlException {
-        ResultSet result = executor.getCatalogs();
-        resultSetDecorator = new ResultSetDecorator(result);
+        setState(OperationState.PENDING);
+        try {
+            ResultSet result = executor.getCatalogs();
+            resultSetDecorator = new ResultSetDecorator(result);
+        }catch (HplsqlException e){
+            setState(OperationState.ERROR);
+            throw e;
+        }
+        setState(OperationState.FINISHED);
     }
 }
 

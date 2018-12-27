@@ -5,13 +5,13 @@ import org.apache.hive.hplsql.service.common.HplsqlResponse;
 import org.apache.hive.hplsql.service.common.conf.ServerConf;
 import org.apache.hive.hplsql.service.common.exception.HplsqlException;
 import org.apache.hive.hplsql.service.common.handle.OperationHandle;
+import org.apache.hive.hplsql.service.common.utils.FileUtils;
 import org.apache.hive.service.rpc.thrift.TGetInfoType;
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.SocketException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -40,12 +40,7 @@ public class Executor {
         File file = null;
         HplsqlResponse response;
         if(saveResultToFile){
-            file = new File(Executor.class.getClassLoader().getResource("").getPath()
-                    + ServerConf.RESULTS_FILE_DIR + operationHandle.getHandleIdentifier() + ".txt");
-            if(file.getParentFile() != null){
-                file.getParentFile().mkdirs();
-            }
-            file.createNewFile();
+            file = FileUtils.createFileNotExist(ServerConf.RESULTS_FILE_DIR + operationHandle.getHandleIdentifier() + ".txt");
             outputStream = new FileOutputStream(file);
         } else{
             outputStream = new ByteArrayOutputStream();
@@ -58,14 +53,19 @@ public class Executor {
         int responseCode;
         try {
             responseCode = exec.run(args);
-        }catch (SocketException e){
-            //如果连接长时间未使用，会报SocketException异常，使得连接不可用，此时需关闭该连接，后续使用新的连接执行
-            reuseConnection.close();
+        }catch (SQLException e){
+            if(e.getMessage().contains("TTransportException")){
+                //如果连接长时间未使用，会报SocketException异常，使得连接不可用，此时需关闭该连接，后续使用新的连接执行
+                reuseConnection.close();
+            }
             throw e;
         }
         //4.保存执行结果
         if(exec.getResultSet() != null){
             response = new HplsqlResponse(responseCode, exec.getResultSet());
+            if(file != null && file.exists()){
+                file.delete();
+            }
         }else {
             printWriter.flush(); //将缓冲区的数据写出到底层输出流中
             response = saveResultToFile ? new HplsqlResponse(responseCode, file)

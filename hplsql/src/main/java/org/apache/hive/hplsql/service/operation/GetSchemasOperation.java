@@ -13,7 +13,14 @@ public class GetSchemasOperation extends ObtainResultSetOperation {
 
     @Override
     public void run() throws HplsqlException {
-        ResultSet result = executor.getSchemas();
-        resultSetDecorator = new ResultSetDecorator(result);
+        setState(OperationState.PENDING);
+        try {
+            ResultSet result = executor.getSchemas();
+            resultSetDecorator = new ResultSetDecorator(result);
+        } catch (HplsqlException e) {
+            setState(OperationState.ERROR);
+            throw e;
+        }
+        setState(OperationState.FINISHED);
     }
 }

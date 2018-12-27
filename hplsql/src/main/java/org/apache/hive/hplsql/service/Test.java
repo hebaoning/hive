@@ -1,6 +1,5 @@
 package org.apache.hive.hplsql.service;
 
-import org.apache.hive.hplsql.service.CLIService;
 import org.apache.hive.hplsql.service.thrift.ThriftBinaryCLIService;
 import org.apache.hive.hplsql.service.thrift.ThriftCLIService;
 

@@ -1,5 +1,4 @@
 package org.apache.hive.hplsql.service.thrift;
-
 import org.apache.hive.hplsql.service.CLIService;
 import org.apache.hive.hplsql.service.common.exception.HplsqlException;
 import org.apache.hive.hplsql.service.common.handle.OperationHandle;
