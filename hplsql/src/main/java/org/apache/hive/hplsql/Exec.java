@@ -123,7 +123,7 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   boolean outputAst = false;
   Connection reusedConnection = null;
   boolean serverMode = false;
-  boolean singleSelectStmtOnServerMode = false;
+  boolean returnResultSet = false;
   public PrintWriter printWriter;
   public ResultSet resultSet;
 
@@ -989,8 +989,9 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   @Override
   public Integer visitBlock(HplsqlParser.BlockContext ctx) {
     List<HplsqlParser.StmtContext> stmts = ctx.stmt();
-    if(serverMode && stmts != null && stmts.size() == 1 && stmts.get(0).select_stmt() != null){
-      singleSelectStmtOnServerMode = true;
+    if(serverMode && stmts != null && stmts.size() == 1 && (
+            stmts.get(0).select_stmt() != null || stmts.get(0).show_stmt() != null)){
+      returnResultSet = true;
     }
     return visitChildren(ctx);
   }
@@ -1918,7 +1919,12 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
   public Integer visitIf_bteq_stmt(HplsqlParser.If_bteq_stmtContext ctx) { 
     return exec.stmt.ifBteq(ctx); 
   }
-  
+
+  @Override
+  public Integer visitShow_stmt(HplsqlParser.Show_stmtContext ctx) {
+    return exec.stmt.show(ctx);
+  }
+
   /**
    * USE statement
    */

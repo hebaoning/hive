@@ -127,7 +127,7 @@ public class Select {
         if (trace) {
           trace(ctx, "Standalone SELECT executed: " + cols + " columns in the result set");
         }
-        if(exec.singleSelectStmtOnServerMode){
+        if(exec.returnResultSet){
           exec.resultSet = rs;
         }else {
           while (rs.next()) {

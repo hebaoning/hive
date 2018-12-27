@@ -91,6 +91,7 @@ stmt :
      | return_stmt
      | rollback_stmt
      | select_stmt
+     | show_stmt
      | signal_stmt
      | summary_stmt
      | update_stmt
@@ -756,7 +757,11 @@ set_mssql_session_option :
 set_teradata_session_option :
        T_QUERY_BAND T_EQUAL (expr | T_NONE) T_UPDATE? T_FOR (T_TRANSACTION | T_SESSION)
      ;
-     
+
+show_stmt:
+       T_SHOW T_CREATE T_TABLE expr
+     ;
+
 signal_stmt :          // SIGNAL statement
        T_SIGNAL ident string?
      ;
@@ -1887,7 +1892,8 @@ T_SET             : S E T ;
 T_SESSION         : S E S S I O N ; 
 T_SESSIONS        : S E S S I O N S ;
 T_SETS            : S E T S;
-T_SHARE           : S H A R E ; 
+T_SHARE           : S H A R E ;
+T_SHOW            : S H O W ;
 T_SIGNAL          : S I G N A L ;
 T_SIMPLE_DOUBLE   : S I M P L E '_' D O U B L E ;
 T_SIMPLE_FLOAT    : S I M P L E '_' F L O A T ;

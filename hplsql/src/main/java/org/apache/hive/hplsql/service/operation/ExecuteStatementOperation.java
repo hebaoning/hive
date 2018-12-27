@@ -21,7 +21,7 @@ public class ExecuteStatementOperation extends ObtainResultSetOperation {
     protected String statement;
     private HplsqlResponse response;
     private TableSchema resultSchema;
-    private boolean singleSelectResult;
+    private boolean getResultFromResultSet;
     private final boolean runAsync;
     private boolean isSpecialStmt;
     private OperationResult result;
@@ -104,7 +104,7 @@ public class ExecuteStatementOperation extends ObtainResultSetOperation {
             throw new HplsqlException("Error while processing statement");
         }
         if (response.getResultSet() != null) {
-            singleSelectResult = true;
+            getResultFromResultSet = true;
             resultSetDecorator = new ResultSetDecorator(response.getResultSet());
         } else {
             result = saveResultToFile ? new OperationResult(response.getFile()) : new OperationResult(response.getResultBytes());
@@ -156,7 +156,7 @@ public class ExecuteStatementOperation extends ObtainResultSetOperation {
 
     @Override
     public TableSchema getResultSetSchema() throws HplsqlException {
-        if (singleSelectResult) {
+        if (getResultFromResultSet) {
             return super.getResultSetSchema();
         }
         if (resultSchema == null) {
@@ -167,7 +167,7 @@ public class ExecuteStatementOperation extends ObtainResultSetOperation {
 
     @Override
     public RowSet getNextRowSet(FetchOrientation orientation, long maxRows) throws HplsqlException {
-        if (singleSelectResult) {
+        if (getResultFromResultSet) {
             return super.getNextRowSet(orientation, maxRows);
         }
         assertState(new ArrayList<>(Arrays.asList(OperationState.FINISHED)));
@@ -224,7 +224,7 @@ public class ExecuteStatementOperation extends ObtainResultSetOperation {
         if (result != null) {
             result.close(isSpecialStmt ? false : true);
         }
-        if (singleSelectResult) {
+        if (getResultFromResultSet) {
             super.clean();
         }
     }

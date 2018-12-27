@@ -971,7 +971,43 @@ public class Stmt {
     exec.setVariable(ctx.ident().getText(), exec.getRowCount());
     return 0;  
   }
-  
+
+  public Integer show(HplsqlParser.Show_stmtContext ctx) {
+    trace(ctx, "SHOW");
+    return show(ctx, ctx.T_SHOW().toString() + " " + ctx.T_CREATE().toString() + " "
+            + ctx.T_TABLE().toString() +  " " + meta.normalizeIdentifierPart(evalPop(ctx.expr()).toString()));
+  }
+
+  public Integer show(ParserRuleContext ctx, String sql) {
+    if(trace) {
+      trace(ctx, "SQL statement: " + sql);
+    }
+    Query query = exec.executeSql(ctx, sql, exec.conf.defaultConnection);
+    if(query.error()) {
+      exec.signal(query);
+      return 1;
+    }
+    try {
+      if(query.rs != null){
+        if(exec.returnResultSet){
+          exec.resultSet = query.rs;
+        }else{
+          while (query.rs.next()) {
+            System.out.println(query.rs.getString(1));
+            exec.outputPrintln(query.rs.getString(1));
+          }
+        }
+      }
+    } catch (SQLException e) {
+      exec.signal(query);
+      exec.closeQuery(query, exec.conf.defaultConnection);
+      return 1;
+    }
+    exec.setSqlCode(0);
+    exec.closeQuery(query, exec.conf.defaultConnection);
+    return 0;
+  }
+
   /**
    * USE statement
    */
