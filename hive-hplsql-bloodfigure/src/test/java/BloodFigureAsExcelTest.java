@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
  */class BloodFigureAsExcelTest {
     //临时文件，存放结果
     String tmpFile = "/Users/jianjie/Desktop/jianjiejin/hive/hive-hplsql-bloodfigure/target/tmp/result.txt";
-
+    //临时测试例子使用
     @Test
     public void test() throws Exception {
         String testFile = "test";
@@ -81,8 +81,8 @@ import org.junit.jupiter.api.Test;
     }
 
     @Test
-    public void testProc() throws Exception {
-        String testFile = "proc";
+    public void testCreate_view_stmt2() throws Exception {
+        String testFile = "create_view_stmt2";
         run(testFile);
     }
 

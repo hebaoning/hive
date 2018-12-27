@@ -14,7 +14,6 @@ public class BloodFigureAsExcel {
     public static void main(String[] args) throws IOException {
         //指定目录
         String fileDir = "/Users/jianjie/Desktop/DW1";
-
         GetFileUtil getFileUtil = new GetFileUtil();
         List<String> fileList = getFileUtil.getFileList(fileDir);
         System.out.println("存储过程数量:" + fileList.size());
@@ -23,9 +22,6 @@ public class BloodFigureAsExcel {
 
         for (int i = 0; i < fileList.size(); i++) {
             String inputFile = fileList.get(i);
-            if (args.length > 0) {
-                inputFile = args[0];
-            }
             InputStream is = System.in;
             if (inputFile != null) {
                 is = new FileInputStream(inputFile);

@@ -44,6 +44,13 @@ digraph G {
 "DDS_CCRD_PRMCD" -> "存储过程：P_DW_CARD_INFO"
 "DDS_CCRD_ACCT" -> "存储过程：P_DW_CARD_INFO"
 "V_DDS_CCRD_CARD_I" -> "存储过程：P_DW_CARD_INFO"
+"存储过程：P_DW_GL_ACCT" -> "DW_GL_ACCT"[color=red penwidth=2.0]
+"DDS_GAS_GL_CODE_COMBINATIONS" -> "存储过程：P_DW_GL_ACCT"
+"DDS_GAS_CUX_GL_DAILY_BALANCE" -> "存储过程：P_DW_GL_ACCT"
+"DDS_KER_BGFMFBAL" -> "存储过程：P_DW_GL_ACCT"
+"V_DDS_KER_BGFMFBAL_I" -> "存储过程：P_DW_GL_ACCT"
+"V_DDS_KER_BGFMOBAL_I" -> "存储过程：P_DW_GL_ACCT"
+"DDS_KER_BGFMOBAL" -> "存储过程：P_DW_GL_ACCT"
 "存储过程：P_DW_DEP_ACCT_HIS" -> "DW_DEP_ACCT_HIS"[color=red penwidth=2.0]
 "DW_DEP_ACCT_HIS" -> "存储过程：P_DW_DEP_ACCT_HIS"
 "DW_DEP_ACCT" -> "存储过程：P_DW_DEP_ACCT_HIS"

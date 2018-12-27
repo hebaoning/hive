@@ -14,12 +14,12 @@ public class BloodFigureAsGraphVisitor extends HplsqlBaseVisitor {
     Set<String> addedSet = new HashSet<>();
 
     /**
-     * 判断是否是表名，过滤中间表，日志表
+     * 过滤中间表，日志表，临时表
      */
     private boolean isTableName(String name) {
         if (!name.startsWith("SESSION.") && !name.equals("ETL_ERRLOG_INFO")
             && !name.equals("ETL.PROCLOG") && !name.startsWith("TMP_")
-            &&!name.startsWith("TEMP_")) {
+            && !name.startsWith("TEMP_")) {
             return true;
         } else {
             return false;
@@ -27,7 +27,7 @@ public class BloodFigureAsGraphVisitor extends HplsqlBaseVisitor {
     }
 
     /**
-     * 保存表之间的关系，结构定义为 GraphVisitor 能识别的格式
+     * 保存表之间的关系，结构定义为 GraphViz 能识别的格式
      */
     private void formateSave(String name1, String name2) {
         if (name1.contains("存")) {
@@ -110,8 +110,7 @@ public class BloodFigureAsGraphVisitor extends HplsqlBaseVisitor {
     public Object visitFrom_table_name_clause(HplsqlParser.From_table_name_clauseContext ctx) {
         fromTableName = ctx.table_name().ident().getText().toUpperCase();
         //过滤中间表
-        if (!fromTableName.startsWith("SESSION.") && !fromTableName.startsWith("TEMP_")
-            && !fromTableName.startsWith("TMP_")) {
+        if (isTableName(fromTableName)) {
             tmpSet.add(fromTableName);
         }
         //保存结果
@@ -146,12 +145,9 @@ public class BloodFigureAsGraphVisitor extends HplsqlBaseVisitor {
         //需要单独保存结果
         if (ctx.merge_table(1) != null && ctx.merge_table(1).select_stmt() == null) {
             fromTableName = ctx.merge_table(1).table_name().ident().getText().toUpperCase();
-
-            if (!fromTableName.startsWith("SESSION.") && !fromTableName.startsWith("TEMP_")
-                && !fromTableName.startsWith("TMP_")) {
+            if (isTableName(fromTableName)) {
                 tmpSet.add(fromTableName);
             }
-
             if (tableName!=null) {
                 saveResult(tableName, tmpSet);
             }
