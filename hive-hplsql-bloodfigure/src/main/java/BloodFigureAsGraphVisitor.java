@@ -50,6 +50,8 @@ public class BloodFigureAsGraphVisitor extends HplsqlBaseVisitor {
             //判断是否获得存储过程名和影响表
             if (!tmpSet.isEmpty()) {
                 if (procName != null) {
+                    //按格式保存 procName 节点，用于画图形状定义
+                    result.append("\"存储过程：" + procName + "\"").append("[style=\"filled\", color=\"black\", fillcolor=\"chartreuse\"]").append("\n");
                     //先保存存储过程和目标表的关系
                     if (!addedSet.contains(procName + tableName)) {
                         formateSave("存储过程：" + procName, tableName);
