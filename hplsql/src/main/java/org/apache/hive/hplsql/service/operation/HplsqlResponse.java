@@ -1,4 +1,4 @@
-package org.apache.hive.hplsql.service.common;
+package org.apache.hive.hplsql.service.operation;
 
 import java.io.File;
 import java.sql.ResultSet;

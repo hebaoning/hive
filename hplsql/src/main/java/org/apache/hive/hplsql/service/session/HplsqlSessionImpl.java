@@ -22,6 +22,7 @@ public class HplsqlSessionImpl implements HplsqlSession {
     private String username;
     private final String password;
     private String ipAddress;
+    private String defaultDbName;
     private SessionManager sessionManager;
     private OperationManager operationManager;
 
@@ -33,16 +34,20 @@ public class HplsqlSessionImpl implements HplsqlSession {
     private volatile long lastAccessTime = System.currentTimeMillis();
 
     public HplsqlSessionImpl(SessionHandle sessionHandle, TProtocolVersion protocol,
-                             String username, String password, String ipAddress) {
+                             String username, String password, String ipAddress, String dbName) {
         this.username = username;
         this.password = password;
         this.ipAddress = ipAddress;
+        this.defaultDbName = dbName;
         creationTime = System.currentTimeMillis();
         this.sessionHandle = sessionHandle != null ? sessionHandle : new SessionHandle(protocol);
     }
 
     @Override
     public void open(ServerConf serverConf) throws Exception {
+        if(defaultDbName != null){
+            serverConf.getConnInits(serverConf.getDefaultConn()).add("use " + defaultDbName);
+        }
         executor = new Executor(serverConf);
         executor.init();
         lastAccessTime = System.currentTimeMillis();

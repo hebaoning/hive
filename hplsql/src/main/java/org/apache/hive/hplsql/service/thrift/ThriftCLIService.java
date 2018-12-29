@@ -12,25 +12,25 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
+public abstract class ThriftCLIService implements TCLIService.Iface {
 
-    public static final Logger LOG = LoggerFactory.getLogger(ThriftCLIService.class.getName());
-
-    protected CLIService cliService;
+    private static final Logger LOG = LoggerFactory.getLogger(ThriftCLIService.class.getName());
 
     private static final TStatus OK_STATUS = new TStatus(TStatusCode.SUCCESS_STATUS);
 
-    public ThriftCLIService(CLIService service) {
-        this.cliService = service;
-    }
+    protected CLIService cliService;
+
+    public abstract void run();
 
     public void init() {
+        cliService = new CLIService();
         cliService.init();
     }
 
+
     @Override
     public TOpenSessionResp OpenSession(TOpenSessionReq req) throws TException {
-        LOG.info("-------openSession---------");
+        LOG.info("-------openSession-------");
         TOpenSessionResp resp = new TOpenSessionResp();
         try {
             SessionHandle sessionHandle = getSessionHandle(req, resp);
@@ -46,12 +46,17 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
     SessionHandle getSessionHandle(TOpenSessionReq req, TOpenSessionResp res) throws HplsqlException {
         String userName = getUserName(req);
         String ipAddress = getIpAddress();
+        String dbName = getDbName(req);
         TProtocolVersion protocol = getMinVersion(CLIService.SERVER_VERSION,
                 req.getClient_protocol());
         SessionHandle sessionHandle = cliService.openSession(protocol, userName, req.getPassword(),
-                ipAddress);
+                ipAddress, dbName);
         res.setServerProtocolVersion(protocol);
         return sessionHandle;
+    }
+
+    private String getDbName(TOpenSessionReq req){
+        return req.getConfiguration().get("use:database");
     }
 
     /**
@@ -104,7 +109,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
 
     @Override
     public TCloseSessionResp CloseSession(TCloseSessionReq req) throws TException {
-        LOG.info("-------CloseSession---------");
+        LOG.info("-------CloseSession-------");
         TCloseSessionResp resp = new TCloseSessionResp();
         try {
             SessionHandle sessionHandle = new SessionHandle(req.getSessionHandle());
@@ -127,7 +132,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetInfoResp GetInfo(TGetInfoReq req) throws TException {
-        LOG.info("-------GetInfo--------- type:" + req.getInfoType());
+        LOG.info("-------GetInfo------- type:" + req.getInfoType());
         TGetInfoResp resp = new TGetInfoResp();
         try {
             String info = cliService.getInfo(new SessionHandle(req.getSessionHandle()),
@@ -136,7 +141,6 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
             value.setStringValue(info);
             resp.setInfoValue(value);
             resp.setStatus(OK_STATUS);
-            LOG.info("-------GetInfo--------- value:" + info +",type:"+ req.getInfoType());
         } catch (Exception e) {
             LOG.warn("Error getting info: ", e);
             resp.setStatus(HplsqlException.toTStatus(e));
@@ -146,7 +150,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
 
     @Override
     public TExecuteStatementResp ExecuteStatement(TExecuteStatementReq req) throws TException {
-        LOG.info("-------ExecuteStatement---------");
+        LOG.info("-------ExecuteStatement-------");
         TExecuteStatementResp resp = new TExecuteStatementResp();
         try {
             SessionHandle sessionHandle = new SessionHandle(req.getSessionHandle());
@@ -177,7 +181,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetTypeInfoResp GetTypeInfo(TGetTypeInfoReq req) throws TException {
-        LOG.info("-------GetTypeInfo--------- " );
+        LOG.info("-------GetTypeInfo------- " );
         TGetTypeInfoResp resp = new TGetTypeInfoResp();
         try {
             OperationHandle operationHandle = cliService.getTypeInfo(new SessionHandle(req.getSessionHandle()));
@@ -201,7 +205,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetCatalogsResp GetCatalogs(TGetCatalogsReq req) throws TException {
-        LOG.info("-------GetCatalogs---------");
+        LOG.info("-------GetCatalogs-------");
         TGetCatalogsResp resp = new TGetCatalogsResp();
         try {
             OperationHandle operationHandle = cliService.getCatalogs(new SessionHandle(req.getSessionHandle()));
@@ -225,7 +229,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetSchemasResp GetSchemas(TGetSchemasReq req) throws TException {
-        LOG.info("-------GetSchemas---------");
+        LOG.info("-------GetSchemas-------");
         TGetSchemasResp resp = new TGetSchemasResp();
         try {
             OperationHandle opHandle = cliService.getSchemas(new SessionHandle(req.getSessionHandle()));
@@ -249,7 +253,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetTablesResp GetTables(TGetTablesReq req) throws TException {
-        LOG.info("-------GetTables---------");
+        LOG.info("-------GetTables-------");
         TGetTablesResp resp = new TGetTablesResp();
         try {
             OperationHandle opHandle = cliService.getTables(
@@ -273,7 +277,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetTableTypesResp GetTableTypes(TGetTableTypesReq tGetTableTypesReq) throws TException {
-        LOG.info("-------GetTableTypes---------");
+        LOG.info("-------GetTableTypes-------");
         return null;
     }
 
@@ -287,7 +291,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetColumnsResp GetColumns(TGetColumnsReq req) throws TException {
-        LOG.info("-------GetColumns---------");
+        LOG.info("-------GetColumns-------");
         TGetColumnsResp resp = new TGetColumnsResp();
         try {
             OperationHandle opHandle = cliService.getColumns(new SessionHandle(req.getSessionHandle()),
@@ -311,7 +315,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetFunctionsResp GetFunctions(TGetFunctionsReq req) throws TException {
-        LOG.info("-------GetFunctions---------");
+        LOG.info("-------GetFunctions-------");
         TGetFunctionsResp resp = new TGetFunctionsResp();
         try {
             OperationHandle opHandle = cliService.getFunctions(
@@ -336,7 +340,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetPrimaryKeysResp GetPrimaryKeys(TGetPrimaryKeysReq tGetPrimaryKeysReq) throws TException {
-        LOG.info("-------GetPrimaryKeys---------");
+        LOG.info("-------GetPrimaryKeys-------");
         return null;
     }
 
@@ -350,7 +354,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetCrossReferenceResp GetCrossReference(TGetCrossReferenceReq tGetCrossReferenceReq) throws TException {
-        LOG.info("-------GetCrossReference---------");
+        LOG.info("-------GetCrossReference-------");
         return null;
     }
 
@@ -363,7 +367,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetOperationStatusResp GetOperationStatus(TGetOperationStatusReq req) throws TException {
-        LOG.info("-------GetOperationStatus---------");
+        //LOG.info("-------GetOperationStatus-------");
         TGetOperationStatusResp resp = new TGetOperationStatusResp();
         OperationHandle operationHandle = new OperationHandle(req.getOperationHandle());
         try {
@@ -394,15 +398,14 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TCancelOperationResp CancelOperation(TCancelOperationReq req) throws TException {
-        LOG.info("-------CancelOperation---------");
+        LOG.info("-------CancelOperation-------");
         TCancelOperationResp resp = new TCancelOperationResp();
         try {
-            //TODO 调用该方法后未能取消SqlOperation，执行语句的线程仍继续运行，待处理。
             cliService.cancelOperation(new OperationHandle(req.getOperationHandle()));
             resp.setStatus(OK_STATUS);
         } catch (Exception e) {
             LOG.warn("Error cancelling operation: ", e);
-            resp.setStatus(HiveSQLException.toTStatus(e));
+            resp.setStatus(HplsqlException.toTStatus(e));
         }
         return resp;
     }
@@ -418,7 +421,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TCloseOperationResp CloseOperation(TCloseOperationReq req) throws TException {
-        LOG.info("-------CloseOperation---------");
+        LOG.info("-------CloseOperation-------");
         TCloseOperationResp resp = new TCloseOperationResp();
         try {
             cliService.closeOperation(new OperationHandle(req.getOperationHandle()));
@@ -441,7 +444,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
     @Override
     public TGetResultSetMetadataResp GetResultSetMetadata(TGetResultSetMetadataReq req) throws
             TException {
-        LOG.info("-------GetResultSetMetadata---------");
+        LOG.info("-------GetResultSetMetadata-------");
         TGetResultSetMetadataResp resp = new TGetResultSetMetadataResp();
         try {
             TableSchema schema = cliService.getResultSetMetadata(new OperationHandle(req.getOperationHandle()));
@@ -465,7 +468,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TFetchResultsResp FetchResults(TFetchResultsReq req) throws TException {
-        LOG.info("-------FetchResults--------- operationHandle:" + req.getOperationHandle().getOperationId());
+        LOG.info("-------FetchResults-------" );
         TFetchResultsResp resp = new TFetchResultsResp();
         try {
             RowSet rowSet = cliService.fetchResults(
@@ -492,7 +495,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     public TGetDelegationTokenResp GetDelegationToken(TGetDelegationTokenReq tGetDelegationTokenReq) throws
             TException {
-        LOG.info("-------GetDelegationToken---------");
+        LOG.info("-------GetDelegationToken-------");
         return null;
     }
 
@@ -506,7 +509,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
     @Override
     public TCancelDelegationTokenResp CancelDelegationToken(TCancelDelegationTokenReq tCancelDelegationTokenReq) throws
             TException {
-        LOG.info("-------CancelDelegationToken---------");
+        LOG.info("-------CancelDelegationToken-------");
         return null;
     }
 
@@ -520,7 +523,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
     @Override
     public TRenewDelegationTokenResp RenewDelegationToken(TRenewDelegationTokenReq tRenewDelegationTokenReq) throws
             TException {
-        LOG.info("-------RenewDelegationToken---------");
+        LOG.info("-------RenewDelegationToken-------");
         return null;
     }
 
@@ -535,7 +538,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TGetQueryIdResp GetQueryId(TGetQueryIdReq tGetQueryIdReq) throws TException {
-        LOG.info("-------GetQueryId---------");
+        LOG.info("-------GetQueryId-------");
         return null;
     }
 
@@ -549,7 +552,7 @@ public abstract class ThriftCLIService implements TCLIService.Iface, Runnable {
      */
     @Override
     public TSetClientInfoResp SetClientInfo(TSetClientInfoReq tSetClientInfoReq) throws TException {
-        LOG.info("-------SetClientInfo---------");
+        LOG.info("-------SetClientInfo-------");
         return null;
     }
 }

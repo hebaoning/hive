@@ -35,8 +35,8 @@ public class CLIService {
         serverConf.init();
     }
 
-    public SessionHandle openSession(TProtocolVersion protocol, String username, String password, String ipAddress) throws HplsqlException {
-        SessionHandle sessionHandle = sessionManager.openSession(protocol, username, password, ipAddress, serverConf);
+    public SessionHandle openSession(TProtocolVersion protocol, String username, String password, String ipAddress, String dbName) throws HplsqlException {
+        SessionHandle sessionHandle = sessionManager.openSession(protocol, username, password, ipAddress, dbName, serverConf);
         LOG.debug(sessionHandle + ": openSession()");
         return sessionHandle;
     }

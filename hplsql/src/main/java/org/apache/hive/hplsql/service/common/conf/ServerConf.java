@@ -33,10 +33,30 @@ public class ServerConf{
      * 默认地址：target/classes/procedures 或jar包所在的目录下的procedures文件夹
      */
     public static final String PROCEDURES_DIR = FileUtils.getClassesOrJarPath() + "procedures/";
+
+    /**
+     * 存储过程文件后缀名
+     */
     public static final String PROCEDURES_FILE_EXT = ".sql";
+
+    /**
+     * 默认jdbc驱动
+     */
     public static final String DEFAULT_CONN_DRIVER = "org.apache.hadoop.hive.jdbc.HiveDriver";
+
+    /**
+     * hplsql配置对象，包含hplsql-site.xml配置文件的信息
+     */
     private Conf hplsqlConf;
+
+    /**
+     * 连接的初始化语句
+     */
     private final Map<String, ArrayList<String>> connInits = new ConcurrentHashMap<>();
+
+    /**
+     * 连接信息
+     */
     private final Map<String, String> connStrs = new ConcurrentHashMap<>();
 
     public void init(){
@@ -112,8 +132,4 @@ public class ServerConf{
         return connInits.get(connName);
     }
 
-    public static void main(String[] args) {
-        System.out.println(ServerConf.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-        System.out.println( System.getProperty("java.class.path") );
-    }
 }

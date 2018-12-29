@@ -13,12 +13,14 @@ public class ThriftBinaryCLIService  extends ThriftCLIService {
 
     public static final Logger LOG = LoggerFactory.getLogger(ThriftBinaryCLIService.class.getName());
 
-    public ThriftBinaryCLIService(CLIService cliService) {
-        super(cliService);
+    public static int port;
+
+    public ThriftBinaryCLIService(int port) {
+        this.port = port;
     }
+
     public void run() {
         try {
-            int port= 9000 ;
             // 传输层(Transport), 设置监听端口为9000
             TServerSocket serverSocket = new TServerSocket(port);
             // 协议层

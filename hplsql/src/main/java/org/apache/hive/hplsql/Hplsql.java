@@ -30,7 +30,7 @@ public class Hplsql {
     argList = Arrays.asList(args);
     if (argList.contains("-server") || argList.contains("--server")) {
       HplServer.init(args);
-      HplServer.startServer();
+      HplServer.start();
     } else {
       System.exit(new Exec().run(args));
     }

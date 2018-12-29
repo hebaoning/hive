@@ -35,16 +35,16 @@ public class SessionManager {
      * @throws HplsqlException
      */
     public SessionHandle openSession(TProtocolVersion protocol, String username, String password, String ipAddress,
-                                     ServerConf serverConf)
+                                     String dbName, ServerConf serverConf)
             throws HplsqlException {
-        return createSession(null, protocol, username, password, ipAddress, serverConf).getSessionHandle();
+        return createSession(null, protocol, username, password, ipAddress, dbName, serverConf).getSessionHandle();
     }
 
     public HplsqlSession createSession(SessionHandle sessionHandle, TProtocolVersion protocol, String username,
-                                       String password, String ipAddress, ServerConf serverConf)
+                                       String password, String ipAddress, String dbName, ServerConf serverConf)
             throws HplsqlException{
         incrementConnections(username, ipAddress);
-        HplsqlSession session = new HplsqlSessionImpl(sessionHandle, protocol, username, password, ipAddress);
+        HplsqlSession session = new HplsqlSessionImpl(sessionHandle, protocol, username, password, ipAddress, dbName);
         session.setSessionManager(this);
         session.setOperationManager(operationManager);
         try {

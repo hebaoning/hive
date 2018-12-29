@@ -1,6 +1,5 @@
 package org.apache.hive.hplsql.service.operation;
 
-import org.apache.hive.hplsql.service.common.HplsqlResponse;
 import org.apache.hive.hplsql.service.common.conf.ServerConf;
 import org.apache.hive.hplsql.service.common.exception.HplsqlException;
 import org.apache.hive.hplsql.service.session.HplsqlSession;
@@ -18,7 +17,7 @@ import java.util.concurrent.Future;
 
 public class ExecuteStatementOperation extends ObtainResultSetOperation {
     private static final List<String> specialStatements = new ArrayList<>();
-    protected String statement;
+    private String statement;
     private HplsqlResponse response;
     private TableSchema resultSchema;
     private boolean getResultFromResultSet;

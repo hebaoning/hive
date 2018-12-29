@@ -1,7 +1,6 @@
 package org.apache.hive.hplsql.service.operation;
 
 import org.apache.hive.hplsql.Exec;
-import org.apache.hive.hplsql.service.common.HplsqlResponse;
 import org.apache.hive.hplsql.service.common.conf.ServerConf;
 import org.apache.hive.hplsql.service.common.exception.HplsqlException;
 import org.apache.hive.hplsql.service.common.handle.OperationHandle;

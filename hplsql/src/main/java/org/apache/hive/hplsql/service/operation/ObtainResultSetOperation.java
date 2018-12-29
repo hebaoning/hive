@@ -54,7 +54,9 @@ public abstract class ObtainResultSetOperation extends Operation {
 
     public void clean() throws HplsqlException {
         try {
-            resultSetDecorator.getResult().close();
+            if(resultSetDecorator.getResult() != null){
+                resultSetDecorator.getResult().close();
+            }
         } catch (Exception e) {
             throw new HplsqlException("close resultset failed :" + e.getMessage());
         }

@@ -3,6 +3,9 @@ package org.apache.hive.hplsql;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.hive.hplsql.functions.Function;
+import org.apache.hive.hplsql.service.CLIService;
+import org.apache.hive.hplsql.service.thrift.ThriftBinaryCLIService;
+import org.apache.hive.hplsql.service.thrift.ThriftCLIService;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.server.TServer;
@@ -64,6 +67,15 @@ public class HplServer {
       }
     }
     return 0;
+  }
+
+  /**
+   * 启动thrift服务，支持使用jdbc连接
+   */
+  public static void start() {
+    ThriftCLIService service = new ThriftBinaryCLIService(exec.arguments.getPort());
+    service.init();
+    service.run();
   }
 
   public static void startServer() {

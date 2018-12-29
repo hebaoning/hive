@@ -7,7 +7,7 @@ public class Test {
     public static void main(String[] args) {
         System.setProperty("log4j.configurationFile", "hive-log4j2.properties");
         CLIService cliService = new CLIService();
-        ThriftCLIService service = new ThriftBinaryCLIService(cliService);
+        ThriftCLIService service = new ThriftBinaryCLIService(9000);
         service.init();
         service.run();
     }
