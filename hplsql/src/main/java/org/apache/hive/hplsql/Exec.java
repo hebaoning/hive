@@ -2341,11 +2341,15 @@ public class Exec extends HplsqlBaseVisitor<Integer> {
 
     Var var = findVariable(actualIdent);
     if (var != null) {
-      if (hasSub) {
-        var.negate();
-      }
       if (!exec.buildSql) {
-        exec.stackPush(var);
+        if (hasSub) {
+          Var var1 = new Var(var);
+          var1.negate();
+          exec.stackPush(var1);
+        }
+        else {
+          exec.stackPush(var);
+        }
       }
       else {
         String value = var.toSqlString();
