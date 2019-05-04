@@ -190,7 +190,7 @@ public class FunctionMisc extends Function {
   void integer(HplsqlParser.Expr_func_paramsContext ctx) {
     if (ctx.func_param().size() == 1) {
       Var v = evalPop(ctx.func_param(0).expr());
-      evalInt(v.intValue());
+      evalInt(v.bigIntValue());
       return;
     }
     evalNull();
